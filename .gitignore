@@ -1,0 +1,81 @@
+# ============================================================
+# Secretos: nunca versionar valores reales
+# ============================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+supabase/.temp/
+supabase/.branches/
+
+# ============================================================
+# Backend: Python / FastAPI
+# ============================================================
+backend/.venv/
+backend/venv/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+.tox/
+.cache/
+
+# ============================================================
+# Frontend: React + TypeScript + Vite (Vercel)
+# ============================================================
+node_modules/
+frontend/dist/
+frontend/build/
+*.tsbuildinfo
+.vite/
+.vercel/
+.turbo/
+frontend/coverage/
+# Vite carga .env.local y .env.*.local con valores de la máquina
+*.local
+
+# Lockfiles: el de npm se versiona. Si el equipo elige otro gestor, ajustar.
+# (Dejar package-lock.json en el repo; no ignorarlo.)
+
+# ============================================================
+# Base de datos local y volcados
+# ============================================================
+*.dump
+*.sql.gz
+pgdata/
+postgres-data/
+# Nota: database/ NO se ignora. esquema_completo.sql, seed/ y migrations/ se versionan.
+
+# ============================================================
+# Logs y temporales
+# ============================================================
+*.log
+logs/
+tmp/
+temp/
+
+# ============================================================
+# Editores y sistema operativo
+# ============================================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
