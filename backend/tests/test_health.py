@@ -9,8 +9,8 @@ def test_health_ok():
     assert r.json() == {"estado": "ok", "base": "ok"}
 
 
-def test_stub_devuelve_formato_de_error():
-    with TestClient(app) as c:
-        r = c.get("/conceptos")
+def test_stub_devuelve_formato_de_error(client, crear_usuario, make_token, auth):
+    uid = crear_usuario()
+    r = client.get("/conceptos", headers=auth(make_token(uid)))
     assert r.status_code == 501
     assert set(r.json()) == {"codigo", "mensaje", "detalle"}
