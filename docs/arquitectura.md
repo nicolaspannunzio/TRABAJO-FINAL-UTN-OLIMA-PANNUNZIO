@@ -40,7 +40,7 @@ Esta versión incorpora las correcciones del modelo posteriores a la segunda dev
 ```mermaid
 flowchart LR
     subgraph Cliente
-        FE["Frontend<br/>React + TypeScript<br/>Vercel"]
+        FE["Frontend<br/>React + TypeScript + TanStack<br/>Vercel"]
     end
 
     subgraph Backend["Backend: FastAPI (Render)"]
@@ -58,7 +58,7 @@ flowchart LR
     FE -- "HTTPS / REST + JSON (token)" --> R
     FE -- "Login (clave anon)" --> AUTH
     R -- "Verifica JWT / Admin API (service_role)" --> AUTH
-    D -- "SQL (DATABASE_URL, ignora RLS)" --> DB
+    D -- "SQLModel (DATABASE_URL, ignora RLS)" --> DB
 ```
 
 El despliegue previsto pone los tres componentes online: Supabase (base de datos y autenticación), Render (backend FastAPI) y Vercel (frontend React). Ver sección 7.
@@ -77,18 +77,25 @@ El código se organiza por módulo: cada módulo funcional tiene su carpeta en `
 
 ```
 frontend/src/
-├─ app/                 # Shell de la aplicación: rutas, guarda de rutas, layout y navegación
+├─ app/                 # Shell de la aplicación: árbol de rutas y guarda (TanStack Router), QueryClient, layout y navegación
 ├─ components/          # Componentes de UI reutilizables
 ├─ services/            # Cliente HTTP hacia la API del backend (adjunta el token, maneja 401)
 ├─ context/             # Estado de sesión/autenticación (token de Supabase Auth)
 ├─ types/               # Tipos TypeScript (api.ts, generado desde docs/openapi.json)
-└─ features/            # Un directorio por módulo, con el mismo nombre que en el backend
+└─ features/            # Un directorio por módulo, con el mismo nombre que en el backend:
+   │                    #   pantallas, formularios, componentes, y las queries y query keys del módulo
    ├─ usuarios/  propiedades/  conceptos/  plantilla/
    └─ checklist/  importes/  advertencias/  reparto/  preliquidaciones/
 ```
 
 - Consume **solo** la API REST del backend para datos de negocio. La única interacción directa con Supabase es el login (SDK de Supabase Auth, con la clave `anon`). El token resultante se adjunta a cada request al backend.
 - Tipado de punta a punta (TypeScript en el frontend, Pydantic en el backend) para reducir errores de integración entre capas.
+- Se usan cuatro librerías de TanStack, cada una con un rol:
+  - **TanStack Query**: todas las llamadas a la API, el caché y la invalidación después de cada escritura. Hay un único `QueryClient` en el shell, y el manejo del 401 (redirección al login) se hace una sola vez en su handler global de errores. Los hooks de consulta y sus query keys viven en `features/<módulo>/`. Los componentes no guardan copias de datos del servidor.
+  - **TanStack Router**: árbol de rutas y guarda de rutas (sesión y rol) con `beforeLoad`. Cada archivo de ruta es delgado y solo importa la pantalla desde `features/<módulo>/`. El archivo generado `routeTree.gen.ts` se versiona y no se edita a mano.
+  - **TanStack Table**: orden, filtro y paginación de las listas (propiedades, conceptos, checklist, versiones de preliquidación).
+  - **TanStack Form**: validación del lado del cliente antes de enviar. La validación del backend siempre decide. Los importes y porcentajes se mantienen como cadenas decimales en los formularios, sin convertirlos a `float`.
+- El formato de error `{codigo, mensaje, detalle}` se interpreta una sola vez en `services/`, y el texto que ve el usuario se elige según `codigo`.
 
 ### 4.2 Backend: Python + FastAPI (Render)
 
@@ -104,8 +111,9 @@ backend/
 │  └─ modules/            # Un directorio por módulo; cada uno tiene:
 │     │                   #   router.py      capa de API
 │     │                   #   schemas.py     DTOs de entrada/salida
+│     │                   #   models.py      clases SQLModel de las tablas que el módulo posee
 │     │                   #   service.py     reglas de negocio
-│     │                   #   repository.py  acceso a PostgreSQL
+│     │                   #   repository.py  acceso a PostgreSQL (sesión de SQLModel)
 │     ├─ usuarios/  propiedades/  conceptos/  plantilla/
 │     └─ checklist/  importes/  advertencias/  reparto/  preliquidaciones/
 └─ tests/                 # conftest.py, una carpeta por módulo y cross/ (pruebas que cruzan módulos)
@@ -115,11 +123,21 @@ backend/
 |---|---|---|
 | `router.py` | Recibir requests HTTP, delegar a `service.py`, devolver respuestas | No contiene lógica de negocio |
 | `schemas.py` | Pydantic: validar forma y tipos de los datos de entrada/salida | No accede a la base de datos |
+| `models.py` | Mapear las tablas del módulo a clases SQLModel | No se devuelve directo en la API; no define tablas de otros módulos |
 | `service.py` | Reglas de negocio del módulo: apertura de período y checklist, validación de duplicados, validación de 100 %, reparto y redondeo, advertencias, snapshot versionado | No arma queries SQL directamente |
-| `repository.py` | Leer y escribir en PostgreSQL | No conoce reglas de negocio |
+| `repository.py` | Leer y escribir en PostgreSQL con sesiones de SQLModel | No conoce reglas de negocio |
 | `core/` | Verificar el JWT de Supabase, resolver el rol del usuario, autorizar la operación | No decide reglas del dominio |
 
-Esta separación permite, por ejemplo, que la validación de que el reparto sume 100 % (se valida en el backend, no como constraint de base de datos) viva en `service.py` del módulo `propiedades` y se pruebe de forma aislada, sin base de datos levantada.
+Esta separación permite, por ejemplo, que la validación de que el reparto sume 100 % (se valida en el backend, no como constraint de base de datos) viva en `service.py` del módulo `propiedades` y se pruebe de forma aislada, sin base de datos levantada. Por eso `repository.py` se mantiene aunque SQLModel permita consultar desde el servicio: si `service.py` arma queries, las reglas puras dejan de probarse sin base.
+
+**Persistencia con SQLModel (resumen).** El texto completo y la tabla de propiedad de cada tabla están en `plan_implementacion.md`, sección 2.
+
+- `models.py` define solo las clases `table=True` de las tablas que el módulo posee. Cada tabla tiene un único módulo dueño. `audit/` posee `auditoria`, y los módulos escriben ahí solo con `audit.registrar(...)`.
+- Un módulo que necesita leer una tabla de otro lo hace en su propio `repository.py`, con construcciones livianas `table()` y `column()` de SQLAlchemy y un join explícito. No importa código del otro módulo ni declara `Relationship` entre módulos.
+- Una columna que apunta a una tabla de otro módulo se declara sin `foreign_key=` en el modelo. La base sigue haciendo cumplir la clave foránea por el DDL. Con `foreign_key="propiedad.id"`, SQLAlchemy falla con `NoReferencedTableError` si la tabla referenciada no está registrada en el `metadata`. Las claves foráneas entre tablas del mismo módulo sí pueden declararlo.
+- El esquema sale de `database/esquema_completo.sql`. No se usa `SQLModel.metadata.create_all()`.
+- Los routers devuelven clases de `schemas.py`, nunca modelos `table=True`.
+- Un choque de unicidad, como un importe duplicado o una versión repetida de preliquidación, llega como `IntegrityError` de la sesión. La capa que ejecuta la operación lo traduce al 409 definido en el contrato de API.
 
 ### 4.3 Autenticación y autorización
 
@@ -137,6 +155,8 @@ Entidades (el DER completo está en `diagrama_ER.md` y el DDL en `database/esque
 - Operación mensual: `checklist_periodo` (conceptos esperados en cada período) e `importe_mensual`.
 - Resultado: `preliquidacion`, `preliquidacion_detalle`, `preliquidacion_advertencia` y `reparto`, persistidos como snapshot inmutable y versionado. La vista `preliquidacion_vigente` devuelve la versión vigente.
 - Seguridad y trazabilidad: `usuario`, `rol` y `auditoria`.
+
+Las tablas se mapean con clases SQLModel por módulo (sección 4.2), pero la fuente de verdad del esquema es el archivo DDL: triggers, `CHECK` y vistas viven ahí y no se generan desde los modelos.
 
 Se eligió Supabase como PostgreSQL administrado, en lugar de una instancia propia en un VPS, para evitar tareas de infraestructura (backups, parches, alta disponibilidad) que no aportan al objetivo del TFI.
 
@@ -192,7 +212,9 @@ Se eligió Supabase como PostgreSQL administrado, en lugar de una instancia prop
 | Componente | Tecnología | Justificación |
 |---|---|---|
 | Frontend | React + TypeScript | Tipado estático reduce errores de integración con la API; ecosistema maduro; curva de aprendizaje conocida por el equipo |
+| Librerías de frontend | TanStack Query, Router, Table y Form | Query resuelve caché e invalidación de datos del servidor sin escribir estado global a mano. Router da rutas tipadas y guardas de sesión y rol. Table y Form cubren las listas (orden, filtro, paginación) y los formularios tipados |
 | Backend | Python + FastAPI | La validación integrada (Pydantic) ataca las cargas duplicadas o inconsistentes relevadas; la documentación OpenAPI automática facilita la integración |
+| Acceso a datos | SQLModel (sobre SQLAlchemy) | Una clase tipada por tabla, con SQLAlchemy por debajo, y del mismo autor y ecosistema que FastAPI y Pydantic. Los schemas de la API siguen separados de los modelos de tabla |
 | Comunicación | API REST + JSON | Estándar simple, suficiente para el volumen y la complejidad del proyecto |
 | Base de datos | PostgreSQL (Supabase) | Modelo relacional apropiado para la relación N:M propietario-propiedad y para persistir snapshots con integridad referencial |
 | Autenticación | Supabase Auth | Evita implementar autenticación desde cero |
@@ -243,7 +265,7 @@ Notas:
 
 - **CORS**: el backend solo acepta el origen de la URL de Vercel.
 - **Cold start**: el plan gratuito de Render suspende el servicio tras un período de inactividad. La primera request puede tardar decenas de segundos. Hay que tenerlo en cuenta al preparar la demo (abrir la URL del backend unos minutos antes) y mostrar un estado de carga en el frontend.
-- **Conexión a la base**: si la conexión directa a Supabase no es accesible desde Render, se usa la cadena de conexión del pooler que ofrece Supabase. Se verifica al desplegar.
+- **Conexión a la base**: si la conexión directa a Supabase no es accesible desde Render, se usa la cadena de conexión del pooler que ofrece Supabase. Se verifica al desplegar. Si se usa el pooler en modo transacción, hay que desactivar los prepared statements del driver (en psycopg 3, `prepare_threshold=None`).
 - Ninguna variable con secretos se define en Vercel.
 
 ---

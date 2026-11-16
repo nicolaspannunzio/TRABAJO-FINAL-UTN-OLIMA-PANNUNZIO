@@ -36,20 +36,21 @@ Objetivo: dejar desplegado y probado el recorrido que exige el tutor (login, pro
 │  │  ├─ main.py                  # creación de la app y registro de routers (fundación)
 │  │  ├─ core/                    # config, JWT, DB, formato de error, require_admin (fundación)
 │  │  ├─ audit/                   # audit.registrar(...) (fundación)
-│  │  └─ modules/                 # cada módulo: router.py, schemas.py, service.py, repository.py
+│  │  └─ modules/                 # cada módulo: router.py, schemas.py, service.py, repository.py y, si posee tablas, models.py
 │  │     ├─ usuarios/  propiedades/  conceptos/  plantilla/                          # A
 │  │     └─ checklist/  importes/  advertencias/  reparto/  preliquidaciones/        # B
 │  └─ tests/                      # conftest.py (fundación), <módulo>/ (dueño), cross/ (ambos)
 ├─ frontend/src/
 │  ├─ app/  components/  services/  context/  types/    # shell, UI común, cliente API, sesión, tipos (fundación)
-│  └─ features/                   # un directorio por módulo, mismo dueño que el backend
+│  │                              #   app/ incluye los archivos de ruta, routeTree.gen.ts, la guarda y el QueryClient
+│  └─ features/                   # un directorio por módulo, mismo dueño que el backend: pantallas, queries
 ├─ database/                      # esquema_completo.sql, seed/, migrations/ (solo si hay un defecto)
 └─ docs/                          # modelo, plan, openapi.json, pruebas, evidencia, informe
 ```
 
 El árbol sale de `modelo_corregido\`: `docs\` pasa a `docs/` y `database\` pasa a `database/`.
 
-**Relación con `arquitectura.md` 4.1 y 4.2.** Ambas secciones describen esta misma estructura: carpetas por módulo para que los directorios de A y B no se superpongan, y las capas como archivos dentro de cada módulo.
+**Relación con `arquitectura.md` 4.1 y 4.2.** Ambas secciones describen esta misma estructura: carpetas por módulo para que los directorios de A y B no se superpongan, y las capas como archivos dentro de cada módulo. Las convenciones de SQLModel y TanStack se resumen allá y se detallan en las dos subsecciones siguientes.
 
 **Módulos funcionales y carpetas.** Los 11 módulos de [`listado_modulos.md`](listado_modulos.md) corresponden a carpetas del código así:
 
@@ -69,9 +70,9 @@ El árbol sale de `modelo_corregido\`: `docs\` pasa a `docs/` y `database\` pasa
 
 | Ruta | Dueño | Regla de cambio |
 |---|---|---|
-| `modules/{usuarios,propiedades,conceptos,plantilla}` y `features/` homónimos, y sus tests | A | Solo A. El otro revisa el PR. |
-| `modules/{checklist,importes,advertencias,reparto,preliquidaciones}` y `features/` homónimos, y sus tests | B | Solo B. El otro revisa el PR. |
-| `core/`, `audit/`, `main.py`, `components/`, `services/`, `context/`, `types/api.ts`, nav y layout, `conftest.py`, `.github/`, `.env.example` | Fundación (compartido) | PR propio `chore(shared): ...`, chico, aprobado por el otro. Nunca mezclado con una unidad de módulo. |
+| `modules/{usuarios,propiedades,conceptos,plantilla}` (incluido su `models.py`) y `features/` homónimos, y sus tests | A | Solo A. El otro revisa el PR. |
+| `modules/{checklist,importes,advertencias,reparto,preliquidaciones}` (incluido su `models.py`) y `features/` homónimos, y sus tests | B | Solo B. El otro revisa el PR. |
+| `core/`, `audit/`, `main.py`, `components/`, `services/`, `context/`, `types/api.ts`, nav y layout, archivos de ruta y `routeTree.gen.ts` (en `app/`), `conftest.py`, `.github/`, `.env.example` | Fundación (compartido) | PR propio `chore(shared): ...`, chico, aprobado por el otro. Nunca mezclado con una unidad de módulo. |
 | `docs/openapi.json` | Compartido | Se regenera desde el código. Un cambio de contrato lo aprueba el otro. |
 | `database/esquema_completo.sql` | Compartido | Congelado. Un defecto se corrige con una migración numerada en `database/migrations/`, aprobada por ambos y reflejada en la documentación del modelo. |
 | `database/seed/` | A (F0-03) | Congelado en Gate 0. Cambios por acuerdo. |
@@ -79,23 +80,63 @@ El árbol sale de `modelo_corregido\`: `docs\` pasa a `docs/` y `database\` pasa
 
 Los routers de todos los módulos se registran en Fase 0 con rutas stub (respuesta 501). Después, nadie toca `main.py` para agregar un módulo.
 
+### Persistencia con SQLModel
+
+El acceso a datos usa SQLModel (sobre SQLAlchemy) con `Session` síncrona. Las convenciones siguientes evitan que A y B definan la misma tabla dos veces o dependan del código del otro.
+
+**Propiedad de las tablas.** Cada tabla la posee un solo módulo, y solo ese módulo la declara con `table=True` en su `models.py`. La asignación es una propuesta derivada de este plan, y el equipo la confirma.
+
+| Carpeta | Dueño | Tablas que posee en `models.py` |
+|---|---|---|
+| `modules/usuarios` | A | `usuario`, `rol` |
+| `modules/propiedades` | A | `propiedad`, `propietario`, `propiedad_propietario` |
+| `modules/conceptos` | A | `concepto` |
+| `modules/plantilla` | A | `concepto_propiedad` |
+| `modules/checklist` | B | `checklist_periodo` |
+| `modules/importes` | B | `importe_mensual` |
+| `modules/preliquidaciones` | B | `preliquidacion`, `preliquidacion_detalle`, `preliquidacion_advertencia`, `reparto` |
+| `audit/` | Fundación | `auditoria` |
+
+`modules/advertencias` y `modules/reparto` no mapean tablas propias. `reparto` contiene solo `repartir`, una función pura que no consulta la base. `advertencias` calcula la variación con una función pura, pero su `GET /advertencias` lee `importe_mensual`, `checklist_periodo`, `concepto` y `concepto_propiedad`, tablas de otros módulos, desde su `repository.py` (convención 2). Por eso tiene `router.py` y `repository.py`, pero ningún `models.py` con tablas. La tabla `reparto` y la tabla `preliquidacion_advertencia` pertenecen a `preliquidaciones`, que es quien las escribe al generar la preliquidación. Los módulos escriben en `auditoria` solo con `audit.registrar(...)`.
+
+**Convenciones.**
+
+1. **Un modelo por tabla y por módulo.** `models.py` declara solo las clases `table=True` de las tablas que el módulo posee.
+2. **Tablas de otro módulo.** Si un módulo necesita leer una tabla ajena, la consulta en su `repository.py` con construcciones livianas `table()` y `column()` de SQLAlchemy y un join explícito. No importa código del otro módulo ni declara `Relationship` entre módulos. Redefinir una clase mapeada sobre la misma tabla falla con el error "Table already defined", mientras que un join con `table()` de Core funciona.
+3. **Claves foráneas entre módulos.** Una columna que apunta a una tabla de otro módulo se declara sin `foreign_key=` en el modelo. La base sigue haciendo cumplir la clave foránea por el DDL, que es la fuente de verdad. Con `foreign_key="propiedad.id"`, SQLAlchemy lanza `NoReferencedTableError` al insertar o consultar si la tabla referenciada no está registrada en el `metadata`. Las claves foráneas entre tablas del mismo módulo pueden usar `foreign_key=`. Por ejemplo, `checklist_periodo.concepto_propiedad_id` se declara sin `foreign_key=` porque `concepto_propiedad` pertenece a `plantilla`.
+4. **El esquema sale del SQL.** El esquema viene de `database/esquema_completo.sql`. No se usa `SQLModel.metadata.create_all()`: crearía una segunda versión del esquema, sin los triggers ni los `CHECK` del DDL. Los tests construyen la base descartable desde el archivo SQL.
+5. **Routers y schemas.** Los routers devuelven clases de `schemas.py`, nunca modelos `table=True`.
+6. **Dinero y porcentajes.** Son `Decimal` (columnas `Numeric`), como ya exige el contrato. Los modelos no usan `float`.
+7. **Choques de unicidad.** Un duplicado de importe o un choque de `UNIQUE (propiedad_id, periodo, version)` sale de la sesión como `IntegrityError`. La capa que ejecuta la operación lo traduce al 409 del contrato de la sección 4.
+8. **Conexión.** Un engine síncrono se construye desde `DATABASE_URL` en `core/`. F0-04 elige y documenta el driver (se propone psycopg 3). Si se usa el pooler de Supabase en modo transacción, hay que desactivar los prepared statements (en psycopg 3, `prepare_threshold=None`).
+
+### Frontend con TanStack
+
+El frontend usa cuatro librerías de TanStack. Las reglas de uso son estas.
+
+- **TanStack Query.** Todas las llamadas a la API pasan por Query, que también maneja el caché y la invalidación después de cada escritura. Un único `QueryClient` vive en el shell compartido, y el manejo del 401 (redirección al login) se hace una sola vez en su handler global de errores de queries y mutaciones. Los hooks de consulta y las query keys viven en `features/<módulo>/`, sin una carpeta global `hooks/`. Los componentes no guardan copias de datos del servidor.
+- **TanStack Router.** Define el árbol de rutas y la guarda de sesión y rol con `beforeLoad`. Los archivos de ruta son delgados: cada uno importa la pantalla desde `features/<módulo>/`. F0-07 crea todos los archivos de ruta como stubs, uno por módulo, para que nadie edite el árbol de rutas después. El archivo generado `routeTree.gen.ts` se versiona, no se edita a mano y pertenece a la fundación: solo cambia en un PR `chore(shared)`.
+- **TanStack Table.** Orden, filtro y paginación de las listas (propiedades, conceptos, checklist y versiones de preliquidación).
+- **TanStack Form.** Validación del lado del cliente antes de enviar. La validación del backend siempre decide. Los importes y porcentajes se mantienen como cadenas decimales en los formularios y nunca se convierten a `float`.
+- **Errores.** El formato `{codigo, mensaje, detalle}` se interpreta una sola vez en `services/`, y el texto de la interfaz se elige según `codigo`.
+
 ## 3. Fase 0: fundación
 
 Orden: F0-01, luego F0-02, F0-03, F0-04 y F0-07 en paralelo, luego F0-05 y F0-06, luego F0-08, luego F0-09, F0-10 y F0-11, y por último F0-12.
 
 | Unidad | Dueño | Salida | Done cuando |
 |---|---|---|---|
-| F0-01 Esqueleto del monorepo | A | Árbol de la sección 2, `.gitignore` que excluye `.env`, `.env.example` por componente, README mínimo, `docs/` y `database/` copiados desde `modelo_corregido\`. | El árbol existe en `main` y no hay ningún archivo `.env` versionado. |
+| F0-01 Esqueleto del monorepo | A | Árbol de la sección 2 (cada carpeta de módulo con `router.py`, `schemas.py`, `service.py` y `repository.py`; el `models.py` lo crea la unidad que declara las tablas del módulo, no el esqueleto), `.gitignore` que excluye `.env`, `.env.example` por componente, README mínimo, `docs/` y `database/` copiados desde `modelo_corregido\`. | El árbol existe en `main` y no hay ningún archivo `.env` versionado. |
 | F0-02 Supabase y esquema | A | Proyecto Supabase con `esquema_completo.sql` aplicado. Cuentas en Auth para un `admin` y un `operador` de prueba, con su fila en `usuario` (mismo UUID). | La consulta a `pg_tables` muestra las 14 tablas con RLS activa. Los dos usuarios existen en `auth.users` y en `usuario`. Una consulta a la Data API con la clave `anon` sobre `propiedad` no devuelve filas. |
 | F0-03 Datos semilla y reinicio | A | `database/seed/seed_demo.sql` y `reset_demo.sql`. Una propiedad real anonimizada con copropietarios (suman 100), catálogo de conceptos con uno de umbral propio, plantilla con al menos un concepto inactivo, importes del período anterior de algunos conceptos (para HU-10 con y sin referencia). | El seed corre sobre una base limpia sin errores. El otro integrante confirma que no quedan nombres, CUIT, DNI ni direcciones reales. El script de reinicio deshabilita los triggers de inmutabilidad, por eso queda marcado como solo para ensayo, nunca para tests ni producción de la demo final. |
-| F0-04 Esqueleto del backend | B | FastAPI con configuración por variables de entorno, pool de conexión (`DATABASE_URL`, con el pooler de Supabase como alternativa), formato de error único, routers stub registrados y `GET /health` con chequeo de base. | `GET /health` responde 200 con estado de base `ok` en local. |
+| F0-04 Esqueleto del backend | B | FastAPI con configuración por variables de entorno, engine y dependencia `Session` de SQLModel construidos desde `DATABASE_URL` (con el pooler de Supabase como alternativa), con el driver elegido y documentado (se propone psycopg 3) y los prepared statements desactivados si se usa el pooler en modo transacción, formato de error único, routers stub registrados y `GET /health` con chequeo de base. | `GET /health` responde 200 con estado de base `ok` en local. |
 | F0-05 Autenticación, rol y auditoría | B | Dependencia que verifica el JWT de Supabase, carga `usuario` y rechaza al inactivo con 403 y código `usuario_inactivo`. `require_admin`. `GET /me`. `audit.registrar(usuario_id, accion, entidad, entidad_id, detalle)`. `GET /propiedades` de solo lectura (humo de punta a punta). | Tests: sin token 401, token inválido 401, usuario inactivo 403 con `usuario_inactivo`, `operador` rechazado por `require_admin`, `audit.registrar` inserta una fila en `auditoria`. |
-| F0-06 Entorno de pruebas | B | `pytest` con fixtures, y una base descartable con `auth.users` simulado (así se ejecutó el DDL, ver [`wiki/00`](../../wiki/00_overview.md)). Decisión del equipo: los tests automáticos y la CI corren contra un PostgreSQL local descartable (el servicio local o un contenedor), y existe un único proyecto Supabase para integración y demo. `reset_demo.sql` no se ejecuta contra ese proyecto una vez que empieza el ensayo de la demo. | `pytest` termina en verde, incluida una prueba de que el trigger rechaza un `UPDATE` sobre `preliquidacion`. |
-| F0-07 Esqueleto del frontend | A | React + TypeScript con login por Supabase Auth (clave `anon`), contexto de sesión, cliente API que adjunta el token y maneja 401, guarda de rutas, layout y navegación con una entrada vacía por módulo, estado de carga visible, lista de propiedades como prueba de humo. | Con las cuentas de F0-02, el login real lleva a la lista de propiedades de la semilla leída desde el backend local. |
+| F0-06 Entorno de pruebas | B | `pytest` con fixtures, y una base descartable con `auth.users` simulado (así se ejecutó el DDL, ver [`wiki/00`](../../wiki/00_overview.md)). Los fixtures entregan una `Session` sobre esa base, con el esquema cargado desde `esquema_completo.sql` y sin `create_all()`. Decisión del equipo: los tests automáticos y la CI corren contra un PostgreSQL local descartable (el servicio local o un contenedor), y existe un único proyecto Supabase para integración y demo. `reset_demo.sql` no se ejecuta contra ese proyecto una vez que empieza el ensayo de la demo. | `pytest` termina en verde, incluida una prueba de que el trigger rechaza un `UPDATE` sobre `preliquidacion`. |
+| F0-07 Esqueleto del frontend | A | React + TypeScript con login por Supabase Auth (clave `anon`), contexto de sesión, cliente API que adjunta el token y maneja 401, TanStack Router con guarda en `beforeLoad` y todos los archivos de ruta creados como stubs (uno por módulo), `QueryClient` con manejo central del 401, layout y navegación con una entrada vacía por módulo, estado de carga visible, lista de propiedades como prueba de humo, armada con TanStack Table. | Con las cuentas de F0-02, el login real lleva a la lista de propiedades de la semilla leída desde el backend local. |
 | F0-08 Contrato de API | Ambos | Stubs con schemas Pydantic para todas las rutas de la sección 4, `docs/openapi.json` generado, `frontend/src/types/api.ts` generado desde él, y el formato de error de la sección 4 implementado en `core/`. | `docs/openapi.json` y `types/api.ts` están mergeados. Los dos integrantes aprobaron el PR. Un test confirma que un 422 de validación devuelve `{codigo, mensaje, detalle}`. |
 | F0-09 Despliegue del backend | B | Servicio en Render con `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CORS_ALLOWED_ORIGIN`, `UMBRAL_VARIACION_DEFAULT_PCT` y, si el proyecto lo requiere, `SUPABASE_JWT_SECRET` ([`arquitectura.md`](arquitectura.md) sección 7). | `GET /health` responde 200 con base `ok` desde la URL pública de Render. |
 | F0-10 Despliegue del frontend | A | Proyecto en Vercel con `VITE_API_URL`, `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. `CORS_ALLOWED_ORIGIN` de Render apunta a la URL de Vercel. | El login desde la URL de Vercel lista las propiedades de la semilla, sin errores de CORS en la consola. Buscar `service_role` y `DATABASE_URL` en el bundle y en el repositorio no da resultados. |
-| F0-11 CI (si es barato) | B | Workflow con `pytest`, build y chequeo de tipos del frontend, y regeneración de `docs/openapi.json` que falla si hay diferencias. | Corre en verde sobre `main` y falla cuando `openapi.json` está desactualizado. |
+| F0-11 CI (si es barato) | B | Workflow con `pytest`, build y chequeo de tipos del frontend, y regeneración de `docs/openapi.json` que falla si hay diferencias. `routeTree.gen.ts` debe estar actualizado: se genera y se compara igual que `openapi.json`, antes del chequeo de tipos del frontend. | Corre en verde sobre `main` y falla cuando `openapi.json` está desactualizado. |
 | F0-12 Verificación cruzada | Ambos | Cada uno verifica el componente desplegado por el otro. | Se cumple el Gate 0. |
 
 **Gate 0.** Se divide el trabajo solo cuando todo esto es verdadero:
@@ -166,11 +207,11 @@ B trabaja contra la semilla de Fase 0 y no espera las pantallas de A. Para leer 
 | Unidad | HU / RN | Alcance: backend, frontend, tests | Done cuando | Depende de |
 |---|---|---|---|---|
 | B1 Apertura de período y checklist | HU-07 / RN-01, RN-09, RN-10 | Back: `POST /checklist` idempotente, validación de `AAAA-MM-01`, una fila `pendiente` por concepto activo. Front: selector de propiedad y mes, vista del checklist. Tests: los 3 criterios. | Pasan los 3 criterios de HU-07 con la propiedad semilla (conceptos activos e inactivo). Abrir dos veces no duplica filas. | Gate 0 |
-| B2 Carga de importes | HU-08 / RN-10, RN-11, RN-12, RN-13, RN-24 | Back: `POST /importes` que inserta el importe, pasa la fila a `cargado` y audita, en una transacción; el duplicado devuelve 409 con mensaje explícito. Front: carga por fila y mensaje de duplicado. Tests: los 4 criterios. | Pasan los 4 criterios de HU-08. Un segundo importe para el mismo par devuelve 409 y conserva el primero. La carga aparece en `auditoria` con el usuario. | B1 |
+| B2 Carga de importes | HU-08 / RN-10, RN-11, RN-12, RN-13, RN-24 | Back: `POST /importes` que inserta el importe, pasa la fila a `cargado` y audita, en una transacción; el duplicado devuelve 409 con mensaje explícito, que sale de capturar el `IntegrityError` de la sesión. Front: carga por fila y mensaje de duplicado. Tests: los 4 criterios. | Pasan los 4 criterios de HU-08. Un segundo importe para el mismo par devuelve 409 y conserva el primero. La carga aparece en `auditoria` con el usuario. | B1 |
 | B3 Marcar no corresponde | HU-09 / RN-10, RN-24, RN-25 | Back: `POST /checklist/{id}/no-corresponde` sobre filas `pendiente` y `cargado`. Sobre una fila `cargado`, una sola transacción borra el `importe_mensual`, guarda en `auditoria.detalle` el importe, `cargado_por` y `fecha_carga` anteriores con el usuario y la fecha del cambio, y pasa la fila a `no_corresponde`. Sobre `pendiente` solo cambia el estado y audita la acción. Sobre `no_corresponde` responde 200 sin cambios. Front: acción por fila con confirmación previa (si la fila está `cargado`, el aviso indica que se elimina el importe) y estados distinguibles. Tests: los 5 criterios; atomicidad (si falla la auditoría no se borra el importe); el criterio 4 genera la versión 2 y compara el detalle de la versión 1 antes y después. | Pasan los 5 criterios de HU-09. La pantalla muestra distinto un concepto en $0 y uno en `no_corresponde`. Tras marcar una fila `cargado`, no queda fila en `importe_mensual` y `auditoria` guarda el valor anterior. El criterio 4 se cierra cuando B6 está mergeado. | B1, B2; el criterio 4 también B6 |
 | B4 Advertencias de variación | HU-10 / RN-15, RN-16, RN-17 | Back: función pura de variación con `Decimal` y umbral efectivo; `GET /advertencias`. Front: advertencias visibles en el checklist. Tests: tabla de casos desde los 5 criterios, sin base de datos. | Pasan los 5 criterios de HU-10, incluidos −$200 sobre $1.000 y los casos sin referencia. Ninguna advertencia bloquea. | B2 para la prueba integrada; la función pura no depende de nada |
 | B5 Cálculo de reparto y redondeo | HU-11 / RN-21 | Back: función pura `repartir(total, porcentajes)` con `ROUND_HALF_UP`; el último por id ascendente absorbe la diferencia. Tests: tabla de casos y una propiedad de invariancia (la suma siempre es `importe_total`). | Para $10,00 con 33,33 / 33,33 / 33,34 el resultado es 3,33 / 3,33 / 3,34 y suma exactamente $10,00. Con −$500 los importes son negativos y la suma coincide. | Ninguna |
-| B6 Generar la preliquidación | HU-11 / RN-17 a RN-22, RN-24 | Back: bloqueo ante pendientes, confirmación explícita, detalle solo con `cargado`, total, advertencias persistidas incluido `total_negativo`, reparto con `porcentaje_aplicado`, versión máxima + 1, todo en una transacción y auditado. Front: botón generar y diálogo que lista los pendientes. Tests: los 5 criterios. | Pasan los 5 criterios de HU-11. Si dos generaciones simultáneas chocan en la versión, una recibe 409 y no queda una preliquidación a medias. | B1 a B5 |
+| B6 Generar la preliquidación | HU-11 / RN-17 a RN-22, RN-24 | Back: bloqueo ante pendientes, confirmación explícita, detalle solo con `cargado`, total, advertencias persistidas incluido `total_negativo`, reparto con `porcentaje_aplicado`, versión máxima + 1, todo en una transacción y auditado; el 409 por choque de versión sale de capturar el `IntegrityError` de la sesión. Front: botón generar y diálogo que lista los pendientes. Tests: los 5 criterios. | Pasan los 5 criterios de HU-11. Si dos generaciones simultáneas chocan en la versión, una recibe 409 y no queda una preliquidación a medias. | B1 a B5 |
 | B7 Consulta de preliquidaciones | HU-12 / RN-21, RN-22 | Back: versiones, vigente y detalle por versión. Front: historial con selector de versión y vista del detalle, advertencias y reparto. Tests: los 2 criterios. | Pasan los 2 criterios de HU-12. La versión 1 se muestra sin consultar `auditoria`. | B6 |
 | B8 Corrección de un importe | HU-13 / RN-14, RN-24 | Back: `PATCH /importes/{id}` que guarda el valor anterior en `auditoria.detalle`. Front: edición del importe desde el checklist. Tests: los 2 criterios. | Pasan los 2 criterios de HU-13. La versión 1 sigue mostrando $86.200 tras corregir a $68.200. | B2, B6 |
 | B9 Nueva versión e inmutabilidad | HU-14 / RN-22, RN-23 | Back: regenerar crea la versión siguiente. Front: acción "generar nueva versión" y vigente resaltada. Tests: los 3 criterios, el último contra la base con un `UPDATE`, un `DELETE` y un `TRUNCATE` sobre las 4 tablas. | Pasan los 3 criterios de HU-14. Una comparación profunda de la versión 1 antes y después de generar la 2 da igualdad. Los 4 tipos de operación prohibida son rechazados por la base. | B6, B8 |
@@ -271,7 +312,7 @@ Se pasa a la fase final cuando todo esto es verdadero:
 Usamos asistentes de IA como herramienta de desarrollo aumentado para explorar el código, optimizarlo, refactorizarlo y escribir pruebas unitarias. El diseño, las decisiones de arquitectura y la aprobación de cada cambio son responsabilidad del equipo. Todo cambio asistido pasa por los mismos controles que cualquier otro.
 
 - **Una unidad de trabajo por sesión.** Cada sesión con el asistente cubre una sola unidad. No se mezclan dos unidades en la misma sesión.
-- **Contexto acotado.** Al asistente se le pasan la HU y sus criterios de aceptación, las filas de RN que aplican, las tablas del DDL que toca, las filas del contrato de la sección 4 y los archivos del módulo. No se le pasa el repositorio completo.
+- **Contexto acotado.** Al asistente se le pasan la HU y sus criterios de aceptación, las filas de RN que aplican, las tablas del DDL que toca, las filas del contrato de la sección 4 y los archivos del módulo, incluido su `models.py` y las definiciones de las tablas que posee. Si la unidad lee una tabla de otro módulo, se le pasa solo la lista de columnas, no el código del otro módulo. No se le pasa el repositorio completo.
 - **Pruebas unitarias primero.** Los criterios de aceptación se convierten en pruebas unitarias que fallan. Después se implementa el cambio.
 - **Optimización y refactorización con red de seguridad.** Antes de refactorizar u optimizar, la suite de pruebas debe estar en verde. El cambio se considera válido solo si las pruebas siguen en verde. Cuando la mejora es de rendimiento, se mide antes y después.
 - **Evidencia.** El asistente informa los comandos que ejecutó y el resultado observado. El PR pega esa salida. "Debería funcionar" no es evidencia.
@@ -308,6 +349,8 @@ Usamos asistentes de IA como herramienta de desarrollo aumentado para explorar e
 | El informe describe algo no implementado | Z4 es la fuente única de lo implementado y el informe se contrasta con ella. | A |
 | Pendientes con la inmobiliaria (umbral de 30 %, bloqueo con pendientes) | Se implementan como están en las fuentes, configurables donde corresponde, y se declaran "a confirmar" en el informe. | A |
 | Un agente modifica archivos fuera de su módulo | Directorios de escritura acotados en el prompt y revisión del diff antes del merge. | Ambos |
+| `routeTree.gen.ts` genera conflictos de merge entre A y B | Todos los archivos de ruta se crean como stubs en F0-07; el archivo generado se versiona y solo cambia en un PR `chore(shared)`; la CI lo compara con la versión regenerada (F0-11). | Ambos |
+| Un modelo de la misma tabla definido dos veces, o una clave foránea a una tabla de otro módulo que rompe los tests | Convenciones 2 y 3 de la sección 2: un solo dueño por tabla, lectura de tablas ajenas con `table()` en el `repository.py`, claves foráneas entre módulos sin `foreign_key=` y el DDL de la base como fuente de verdad. | Ambos |
 
 ## 10. Trazabilidad HU, unidad de trabajo y dueño
 
