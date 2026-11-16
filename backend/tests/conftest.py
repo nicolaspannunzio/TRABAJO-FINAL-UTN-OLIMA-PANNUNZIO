@@ -85,6 +85,12 @@ def make_token():
         return jwt.encode(claims, secret, algorithm="HS256")
     return _token
 
+@pytest.fixture
+def make_raw_token():
+    """Token firmado con los claims exactos que se pasen (para casos inválidos)."""
+    def _token(claims: dict) -> str:
+        return jwt.encode(claims, TEST_SECRET, algorithm="HS256")
+    return _token
 
 @pytest.fixture
 def auth():
