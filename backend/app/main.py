@@ -19,9 +19,8 @@ from app.modules.preliquidaciones.router import router as preliquidaciones
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    db.init_pool()
     yield
-    db.close_pool()
+    db.dispose_engine()  # el engine se crea la primera vez que se usa
 
 
 app = FastAPI(title="Preliquidación de alquileres", lifespan=lifespan)

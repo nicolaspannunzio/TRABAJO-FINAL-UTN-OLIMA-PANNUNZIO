@@ -12,8 +12,7 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str | None = None
     cors_allowed_origin: str = "http://localhost:5173"
     umbral_variacion_default_pct: Decimal = Decimal("30.00")
-    db_pool_min: int = 1
-    db_pool_max: int = 5
+    db_pool_size: int = 5
 
 
 @lru_cache
