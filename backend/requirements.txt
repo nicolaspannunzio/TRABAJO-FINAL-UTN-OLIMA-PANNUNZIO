@@ -3,5 +3,6 @@ uvicorn[standard]
 pydantic-settings
 sqlmodel
 psycopg[binary]
+PyJWT[crypto]
 pytest
 httpx
