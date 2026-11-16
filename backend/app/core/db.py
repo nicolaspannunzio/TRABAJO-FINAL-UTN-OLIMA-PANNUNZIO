@@ -1,40 +1,52 @@
-from psycopg.rows import dict_row
-from psycopg_pool import ConnectionPool
+from functools import lru_cache
+
+from sqlalchemy import text
+from sqlmodel import Session, create_engine
+
 from app.core.config import get_settings
 
-pool: ConnectionPool | None = None
+
+def _normalizar_url(url: str) -> str:
+    # SQLAlchemy usa psycopg 2 por defecto; forzamos psycopg 3.
+    for prefijo in ("postgresql://", "postgres://"):
+        if url.startswith(prefijo):
+            return "postgresql+psycopg://" + url[len(prefijo):]
+    return url
 
 
-def init_pool() -> None:
-    global pool
+@lru_cache
+def get_engine():
     s = get_settings()
-    pool = ConnectionPool(
-        s.database_url,
-        min_size=s.db_pool_min,
-        max_size=s.db_pool_max,
-        kwargs={"row_factory": dict_row, "prepare_threshold": None},
-        check=ConnectionPool.check_connection,
-        timeout=10,
-        open=False,
+    return create_engine(
+        _normalizar_url(s.database_url),
+        pool_size=s.db_pool_size,
+        max_overflow=2,
+        pool_pre_ping=True,  # descarta conexiones cortadas por Supabase/Render
+        connect_args={
+            "prepare_threshold": None,  # necesario con el pooler en modo transacción
+            "connect_timeout": 5,
+        },
     )
-    pool.open(wait=False)  # no tira la app si la base está caída; /health lo informa
 
 
-def close_pool() -> None:
-    if pool is not None:
-        pool.close()
+def dispose_engine() -> None:
+    get_engine().dispose()
 
 
-def get_conn():
-    """Dependencia FastAPI: una conexión por request, con commit/rollback automático."""
-    with pool.connection() as conn:
-        yield conn
+def get_session():
+    """Dependencia FastAPI: una Session por request.
+
+    No hace commit: cada operación de escritura confirma explícitamente.
+    Si no se confirma, al cerrar se descarta (rollback).
+    """
+    with Session(get_engine()) as session:
+        yield session
 
 
 def check_db() -> bool:
     try:
-        with pool.connection(timeout=3) as conn:
-            conn.execute("SELECT 1")
+        with get_engine().connect() as conn:
+            conn.execute(text("SELECT 1"))
         return True
     except Exception:
         return False
