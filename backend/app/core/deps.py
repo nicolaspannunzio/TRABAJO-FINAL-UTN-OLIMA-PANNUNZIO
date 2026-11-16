@@ -37,7 +37,7 @@ def get_current_user(claims: dict = Depends(get_claims),
     # get_claims va primero: sin token válido nunca se toca la base.
     try:
         user_id = UUID(claims["sub"])
-    except (KeyError, ValueError):
+    except (KeyError, ValueError, TypeError, AttributeError):
         raise AppError(401, "token_invalido", "Token inválido")
 
     stmt = (

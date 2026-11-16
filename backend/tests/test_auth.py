@@ -1,8 +1,8 @@
 import pytest
-from fastapi import Depends
-
+import time
 from app.core.deps import require_admin
 from app.main import app
+from fastapi import Depends
 
 app.add_api_route("/_test/solo-admin", lambda: {"ok": True}, methods=["GET"],
                   dependencies=[Depends(require_admin)], include_in_schema=False)
@@ -66,3 +66,36 @@ def test_propiedades_requiere_token_y_lista(client, crear_usuario, make_token, a
     r = client.get("/propiedades", headers=auth(make_token(uid)))
     assert r.status_code == 200
     assert isinstance(r.json(), list)
+    
+def _claims(**extra):
+    base = {"aud": "authenticated", "exp": int(time.time()) + 3600}
+    base.update(extra)
+    return base
+
+
+def test_token_sin_exp_401(client, crear_usuario, make_raw_token, auth):
+    uid = crear_usuario()
+    claims = {"sub": str(uid), "aud": "authenticated"}  # sin exp: nunca vence
+    r = client.get("/me", headers=auth(make_raw_token(claims)))
+    assert r.status_code == 401
+    assert r.json()["codigo"] == "token_invalido"
+
+
+def test_token_sin_sub_401(client, make_raw_token, auth):
+    r = client.get("/me", headers=auth(make_raw_token(_claims())))
+    assert r.status_code == 401
+    assert r.json()["codigo"] == "token_invalido"
+
+
+@pytest.mark.parametrize("sub", ["no-es-un-uuid", 123, None])
+def test_token_con_sub_invalido_401(client, make_raw_token, auth, sub):
+    r = client.get("/me", headers=auth(make_raw_token(_claims(sub=sub))))
+    assert r.status_code == 401
+    assert r.json()["codigo"] == "token_invalido"
+
+
+def test_token_con_audiencia_incorrecta_401(client, crear_usuario, make_raw_token, auth):
+    uid = crear_usuario()
+    r = client.get("/me", headers=auth(make_raw_token(_claims(sub=str(uid), aud="anon"))))
+    assert r.status_code == 401
+    assert r.json()["codigo"] == "token_invalido"

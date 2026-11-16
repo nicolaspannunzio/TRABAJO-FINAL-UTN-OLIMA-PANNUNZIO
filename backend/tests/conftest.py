@@ -1,12 +1,33 @@
 import os
 import time
 import uuid
+from urllib.parse import urlparse
+
+import pytest
 
 TEST_SECRET = "secreto-de-pruebas-secreto-de-pruebas-0123456789"
-os.environ["SUPABASE_JWT_SECRET"] = TEST_SECRET  # antes de importar la app
+_HOSTS_LOCALES = {"localhost", "127.0.0.1", "::1","postgres"}
+
+
+def _fijar_base_de_pruebas() -> None:
+    """Los tests escriben y borran filas: solo pueden correr contra una base local.
+
+    Se ignora DATABASE_URL (que puede venir de backend/.env y apuntar a Supabase).
+    """
+    url = os.environ.get("TEST_DATABASE_URL")
+    if not url:
+        pytest.exit("Falta TEST_DATABASE_URL: los tests no usan DATABASE_URL.")
+    host = urlparse(url).hostname
+    if host not in _HOSTS_LOCALES:
+        pytest.exit(f"TEST_DATABASE_URL apunta a '{host}', no a una base local. Abortado.")
+    os.environ["DATABASE_URL"] = url
+
+
+# Antes de importar la app: las variables de entorno pisan a backend/.env
+_fijar_base_de_pruebas()
+os.environ["SUPABASE_JWT_SECRET"] = TEST_SECRET
 
 import jwt
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlmodel import Session
@@ -63,6 +84,12 @@ def make_token():
         return jwt.encode(claims, secret, algorithm="HS256")
     return _token
 
+@pytest.fixture
+def make_raw_token():
+    """Token firmado con los claims exactos que se pasen (para casos inválidos)."""
+    def _token(claims: dict) -> str:
+        return jwt.encode(claims, TEST_SECRET, algorithm="HS256")
+    return _token
 
 @pytest.fixture
 def auth():

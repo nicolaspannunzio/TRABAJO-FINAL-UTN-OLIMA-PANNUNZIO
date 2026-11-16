@@ -30,7 +30,10 @@ def decode_token(token: str) -> dict:
             algorithms = [alg]
         else:
             raise AppError(401, "token_invalido", "Token inválido")
-        return jwt.decode(token, key, algorithms=algorithms, audience=AUDIENCE)
+        return jwt.decode(
+            token, key, algorithms=algorithms, audience=AUDIENCE,
+            options={"require": ["exp", "sub", "aud"]},
+        )
     except jwt.ExpiredSignatureError:
         raise AppError(401, "token_expirado", "La sesión expiró")
     except jwt.PyJWTError:
