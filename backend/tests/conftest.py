@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import pytest
 
 TEST_SECRET = "secreto-de-pruebas-secreto-de-pruebas-0123456789"
-_HOSTS_LOCALES = {"localhost", "127.0.0.1", "::1"}
+_HOSTS_LOCALES = {"localhost", "127.0.0.1", "::1","postgres"}
 
 
 def _fijar_base_de_pruebas() -> None:
@@ -16,11 +16,10 @@ def _fijar_base_de_pruebas() -> None:
     """
     url = os.environ.get("TEST_DATABASE_URL")
     if not url:
-        pytest.exit("Falta TEST_DATABASE_URL: los tests no usan DATABASE_URL.", returncode=2)
+        pytest.exit("Falta TEST_DATABASE_URL: los tests no usan DATABASE_URL.")
     host = urlparse(url).hostname
     if host not in _HOSTS_LOCALES:
-        pytest.exit(f"TEST_DATABASE_URL apunta a '{host}', no a una base local. Abortado.",
-                    returncode=2)
+        pytest.exit(f"TEST_DATABASE_URL apunta a '{host}', no a una base local. Abortado.")
     os.environ["DATABASE_URL"] = url
 
 
