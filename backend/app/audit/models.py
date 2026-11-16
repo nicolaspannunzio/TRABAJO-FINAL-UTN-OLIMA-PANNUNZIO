@@ -1,15 +1,22 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Column
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, text
+from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 from sqlmodel import Field, SQLModel
 
 
 class Auditoria(SQLModel, table=True):
     __tablename__ = "auditoria"
 
-    id: UUID | None = Field(default=None, primary_key=True)
+    id: UUID | None = Field(
+    default=None,
+    sa_column=Column(
+        PG_UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    ),
+)
     # usuario_id apunta a una tabla de otro módulo: sin foreign_key= (convención 3)
     usuario_id: UUID
     accion: str
