@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { RouterProvider } from '@tanstack/react-router'
 import { useSession } from '../context/session'
 import { router } from './router'
+import { Cargando } from '../components/Cargando'
 
 export function App() {
   const { session, cargando } = useSession()
@@ -12,6 +13,6 @@ export function App() {
     if (!cargando) void router.invalidate()
   }, [autenticado, cargando])
 
-  if (cargando) return <p>Cargando…</p>
+  if (cargando) return <Cargando />
   return <RouterProvider router={router} context={{ session }} />
 }
