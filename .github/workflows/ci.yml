@@ -1,0 +1,114 @@
+# F0-11: CI del monorepo.
+# Corre en cada PR y en cada push a main. Falla si:
+#   - pytest no termina en verde,
+#   - docs/openapi.json no coincide con el contrato que genera la app,
+#   - frontend/src/types/api.ts o routeTree.gen.ts no coinciden con lo que se regenera,
+#   - el chequeo de tipos o el lint del frontend fallan.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (pytest y contrato)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    # PostgreSQL descartable: los tests recrean el esquema desde database/esquema_completo.sql.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: preliq_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # El conftest exige un host local y un nombre de base terminado en _test.
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/preliq_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13" # la misma versión que Render
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: pytest
+        run: python -m pytest
+
+      - name: Regenerar docs/openapi.json
+        run: python -m scripts.generar_openapi
+
+      - name: El contrato versionado coincide con la app
+        working-directory: .
+        run: |
+          if ! git diff --exit-code -- docs/openapi.json; then
+            echo "::error::docs/openapi.json está desactualizado. Corré 'python -m scripts.generar_openapi' desde backend/ y commiteá el resultado."
+            exit 1
+          fi
+
+  frontend:
+    name: Frontend (generados, tipos, build y lint)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Regenerar types/api.ts desde docs/openapi.json
+        run: npm run gen:api
+
+      # vite build regenera routeTree.gen.ts con el plugin de TanStack Router.
+      # Va antes del chequeo de tipos, como pide el plan (F0-11).
+      - name: Build (regenera routeTree.gen.ts)
+        run: npx vite build
+
+      - name: Los archivos generados están actualizados
+        working-directory: .
+        run: |
+          if ! git diff --exit-code -- frontend/src/types/api.ts frontend/src/app/routeTree.gen.ts; then
+            echo "::error::Hay archivos generados desactualizados. Corré 'npm run gen:api' y 'npm run build' en frontend/ y commiteá el resultado en un PR chore(shared)."
+            exit 1
+          fi
+
+      - name: Chequeo de tipos
+        run: npx tsc -b
+
+      - name: Lint
+        run: npm run lint
