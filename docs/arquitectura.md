@@ -133,7 +133,7 @@ Esta separación permite, por ejemplo, que la validación de que el reparto sume
 **Persistencia con SQLModel (resumen).** El texto completo y la tabla de propiedad de cada tabla están en `plan_implementacion.md`, sección 2.
 
 - `models.py` define solo las clases `table=True` de las tablas que el módulo posee. Cada tabla tiene un único módulo dueño. `audit/` posee `auditoria`, y los módulos escriben ahí solo con `audit.registrar(...)`.
-- Un módulo que necesita leer una tabla de otro lo hace en su propio `repository.py`, con construcciones livianas `table()` y `column()` de SQLAlchemy y un join explícito. No importa código del otro módulo ni declara `Relationship` entre módulos.
+- Un módulo que necesita leer una tabla de otro lo hace en su propio `repository.py`, con construcciones livianas `table()` y `column()` de SQLAlchemy y un join explícito. No importa código del otro módulo ni declara `Relationship` entre módulos. Entre módulos del mismo integrante se pueden compartir schemas: `importes` importa `FilaChecklist` de `checklist` (los dos son de B).
 - Una columna que apunta a una tabla de otro módulo se declara sin `foreign_key=` en el modelo. La base sigue haciendo cumplir la clave foránea por el DDL. Con `foreign_key="propiedad.id"`, SQLAlchemy falla con `NoReferencedTableError` si la tabla referenciada no está registrada en el `metadata`. Las claves foráneas entre tablas del mismo módulo sí pueden declararlo.
 - El esquema sale de `database/esquema_completo.sql`. No se usa `SQLModel.metadata.create_all()`.
 - Los routers devuelven clases de `schemas.py`, nunca modelos `table=True`.
