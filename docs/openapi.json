@@ -1,0 +1,3842 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Preliquidación de alquileres",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/usuarios": {
+      "get": {
+        "tags": [
+          "usuarios"
+        ],
+        "summary": "Listar Usuarios",
+        "operationId": "listar_usuarios_usuarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsuarioOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Usuarios Usuarios Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "usuarios"
+        ],
+        "summary": "Crear Usuario",
+        "operationId": "crear_usuario_usuarios_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioCrear"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto con el estado actual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Falla de una dependencia externa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/usuarios/{usuario_id}": {
+      "patch": {
+        "tags": [
+          "usuarios"
+        ],
+        "summary": "Actualizar Usuario",
+        "operationId": "actualizar_usuario_usuarios__usuario_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Usuario Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioActualizar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usuarios/{usuario_id}/baja": {
+      "post": {
+        "tags": [
+          "usuarios"
+        ],
+        "summary": "Dar De Baja Usuario",
+        "operationId": "dar_de_baja_usuario_usuarios__usuario_id__baja_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "usuario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Usuario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/propiedades": {
+      "get": {
+        "tags": [
+          "propiedades"
+        ],
+        "summary": "Listar Propiedades",
+        "operationId": "listar_propiedades_propiedades_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PropiedadOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Propiedades Propiedades Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "propiedades"
+        ],
+        "summary": "Crear Propiedad",
+        "operationId": "crear_propiedad_propiedades_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropiedadCrear"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropiedadOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/propiedades/{propiedad_id}": {
+      "get": {
+        "tags": [
+          "propiedades"
+        ],
+        "summary": "Obtener Propiedad",
+        "operationId": "obtener_propiedad_propiedades__propiedad_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropiedadOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "propiedades"
+        ],
+        "summary": "Actualizar Propiedad",
+        "operationId": "actualizar_propiedad_propiedades__propiedad_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropiedadActualizar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropiedadOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/propiedades/{propiedad_id}/propietarios": {
+      "get": {
+        "tags": [
+          "propiedades"
+        ],
+        "summary": "Obtener Reparto",
+        "operationId": "obtener_reparto_propiedades__propiedad_id__propietarios_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RepartoVigente"
+                  },
+                  "title": "Response Obtener Reparto Propiedades  Propiedad Id  Propietarios Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "propiedades"
+        ],
+        "summary": "Reemplazar Reparto",
+        "operationId": "reemplazar_reparto_propiedades__propiedad_id__propietarios_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RepartoEntrada"
+                },
+                "title": "Datos"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RepartoVigente"
+                  },
+                  "title": "Response Reemplazar Reparto Propiedades  Propiedad Id  Propietarios Put"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/propietarios": {
+      "get": {
+        "tags": [
+          "propietarios"
+        ],
+        "summary": "Listar Propietarios",
+        "operationId": "listar_propietarios_propietarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PropietarioOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Propietarios Propietarios Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "propietarios"
+        ],
+        "summary": "Crear Propietario",
+        "operationId": "crear_propietario_propietarios_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropietarioCrear"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropietarioOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/propietarios/{propietario_id}": {
+      "get": {
+        "tags": [
+          "propietarios"
+        ],
+        "summary": "Obtener Propietario",
+        "operationId": "obtener_propietario_propietarios__propietario_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propietario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propietario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropietarioOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "propietarios"
+        ],
+        "summary": "Actualizar Propietario",
+        "operationId": "actualizar_propietario_propietarios__propietario_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propietario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propietario Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropietarioActualizar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropietarioOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conceptos": {
+      "get": {
+        "tags": [
+          "conceptos"
+        ],
+        "summary": "Listar Conceptos",
+        "operationId": "listar_conceptos_conceptos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConceptoOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listar Conceptos Conceptos Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "conceptos"
+        ],
+        "summary": "Crear Concepto",
+        "operationId": "crear_concepto_conceptos_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConceptoCrear"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConceptoOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto con el estado actual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/conceptos/{concepto_id}": {
+      "patch": {
+        "tags": [
+          "conceptos"
+        ],
+        "summary": "Actualizar Concepto",
+        "operationId": "actualizar_concepto_conceptos__concepto_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "concepto_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Concepto Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConceptoActualizar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConceptoOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto con el estado actual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/propiedades/{propiedad_id}/conceptos": {
+      "get": {
+        "tags": [
+          "plantilla"
+        ],
+        "summary": "Listar Plantilla",
+        "operationId": "listar_plantilla_propiedades__propiedad_id__conceptos_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConceptoPropiedadOut"
+                  },
+                  "title": "Response Listar Plantilla Propiedades  Propiedad Id  Conceptos Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "plantilla"
+        ],
+        "summary": "Asociar Concepto",
+        "operationId": "asociar_concepto_propiedades__propiedad_id__conceptos_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConceptoPropiedadCrear"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConceptoPropiedadOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto con el estado actual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/propiedades/{propiedad_id}/conceptos/{concepto_propiedad_id}": {
+      "patch": {
+        "tags": [
+          "plantilla"
+        ],
+        "summary": "Actualizar Concepto Propiedad",
+        "operationId": "actualizar_concepto_propiedad_propiedades__propiedad_id__conceptos__concepto_propiedad_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          },
+          {
+            "name": "concepto_propiedad_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Concepto Propiedad Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConceptoPropiedadActualizar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConceptoPropiedadOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checklist": {
+      "post": {
+        "tags": [
+          "checklist"
+        ],
+        "summary": "Abrir Periodo",
+        "operationId": "abrir_periodo_checklist_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChecklistAbrir"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "El checklist ya existía",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "checklist"
+        ],
+        "summary": "Obtener Checklist",
+        "operationId": "obtener_checklist_checklist_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          },
+          {
+            "name": "periodo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-01$",
+              "examples": [
+                "2026-09-01"
+              ],
+              "title": "Periodo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checklist/{fila_id}/no-corresponde": {
+      "post": {
+        "tags": [
+          "checklist"
+        ],
+        "summary": "Marcar No Corresponde",
+        "operationId": "marcar_no_corresponde_checklist__fila_id__no_corresponde_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "fila_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Fila Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoCorrespondeOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/importes": {
+      "post": {
+        "tags": [
+          "importes"
+        ],
+        "summary": "Cargar Importe",
+        "operationId": "cargar_importe_importes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImporteCrear"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilaChecklist"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto con el estado actual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/importes/{importe_id}": {
+      "patch": {
+        "tags": [
+          "importes"
+        ],
+        "summary": "Corregir Importe",
+        "operationId": "corregir_importe_importes__importe_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "importe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Importe Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImporteCorregir"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImporteOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/advertencias": {
+      "get": {
+        "tags": [
+          "advertencias"
+        ],
+        "summary": "Vista Previa",
+        "operationId": "vista_previa_advertencias_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          },
+          {
+            "name": "periodo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-01$",
+              "examples": [
+                "2026-09-01"
+              ],
+              "title": "Periodo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdvertenciaPrevia"
+                  },
+                  "title": "Response Vista Previa Advertencias Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/preliquidaciones": {
+      "post": {
+        "tags": [
+          "preliquidaciones"
+        ],
+        "summary": "Generar",
+        "operationId": "generar_preliquidaciones_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreliquidacionCrear"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreliquidacionOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto con el estado actual",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "preliquidaciones"
+        ],
+        "summary": "Listar Versiones",
+        "operationId": "listar_versiones_preliquidaciones_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          },
+          {
+            "name": "periodo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-01$",
+              "examples": [
+                "2026-09-01"
+              ],
+              "title": "Periodo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PreliquidacionResumen"
+                  },
+                  "title": "Response Listar Versiones Preliquidaciones Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/preliquidaciones/vigente": {
+      "get": {
+        "tags": [
+          "preliquidaciones"
+        ],
+        "summary": "Obtener Vigente",
+        "operationId": "obtener_vigente_preliquidaciones_vigente_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "propiedad_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Propiedad Id"
+            }
+          },
+          {
+            "name": "periodo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-01$",
+              "examples": [
+                "2026-09-01"
+              ],
+              "title": "Periodo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreliquidacionOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/preliquidaciones/{preliquidacion_id}": {
+      "get": {
+        "tags": [
+          "preliquidaciones"
+        ],
+        "summary": "Obtener Version",
+        "operationId": "obtener_version_preliquidaciones__preliquidacion_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "preliquidacion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Preliquidacion Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreliquidacionOut"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El recurso no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Me",
+        "operationId": "me_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usuario"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token o token inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuario inactivo o sin permiso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorRespuesta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdvertenciaOut": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "variacion_inusual",
+              "sin_referencia",
+              "total_negativo",
+              "pendiente_confirmado"
+            ],
+            "title": "Tipo"
+          },
+          "detalle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detalle"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo"
+        ],
+        "title": "AdvertenciaOut"
+      },
+      "AdvertenciaPrevia": {
+        "properties": {
+          "concepto_propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Concepto Propiedad Id"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "variacion_inusual",
+              "sin_referencia",
+              "total_negativo",
+              "pendiente_confirmado"
+            ],
+            "title": "Tipo"
+          },
+          "detalle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detalle"
+          }
+        },
+        "type": "object",
+        "required": [
+          "concepto_propiedad_id",
+          "tipo"
+        ],
+        "title": "AdvertenciaPrevia",
+        "description": "HU-10: vista previa, no se persiste ni bloquea."
+      },
+      "ChecklistAbrir": {
+        "properties": {
+          "propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propiedad Id"
+          },
+          "periodo": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-01$",
+            "format": "date",
+            "title": "Periodo",
+            "examples": [
+              "2026-09-01"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "propiedad_id",
+          "periodo"
+        ],
+        "title": "ChecklistAbrir",
+        "description": "HU-07: abrir el período. Un período que no es AAAA-MM-01 se rechaza con 422."
+      },
+      "ChecklistOut": {
+        "properties": {
+          "propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propiedad Id"
+          },
+          "periodo": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-01$",
+            "format": "date",
+            "title": "Periodo",
+            "examples": [
+              "2026-09-01"
+            ]
+          },
+          "filas": {
+            "items": {
+              "$ref": "#/components/schemas/FilaChecklist"
+            },
+            "type": "array",
+            "title": "Filas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "propiedad_id",
+          "periodo",
+          "filas"
+        ],
+        "title": "ChecklistOut"
+      },
+      "ConceptoActualizar": {
+        "properties": {
+          "nombre": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo"
+          },
+          "umbral_variacion_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+                "examples": [
+                  "15000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Umbral Variacion Pct"
+          }
+        },
+        "type": "object",
+        "title": "ConceptoActualizar"
+      },
+      "ConceptoCrear": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Nombre"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo"
+          },
+          "umbral_variacion_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+                "examples": [
+                  "15000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Umbral Variacion Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre"
+        ],
+        "title": "ConceptoCrear"
+      },
+      "ConceptoOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo"
+          },
+          "umbral_variacion_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+                "examples": [
+                  "15000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Umbral Variacion Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "title": "ConceptoOut"
+      },
+      "ConceptoPropiedadActualizar": {
+        "properties": {
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activo"
+        ],
+        "title": "ConceptoPropiedadActualizar"
+      },
+      "ConceptoPropiedadCrear": {
+        "properties": {
+          "concepto_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Concepto Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "concepto_id"
+        ],
+        "title": "ConceptoPropiedadCrear"
+      },
+      "ConceptoPropiedadOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propiedad Id"
+          },
+          "concepto_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Concepto Id"
+          },
+          "concepto": {
+            "type": "string",
+            "title": "Concepto"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "propiedad_id",
+          "concepto_id",
+          "concepto",
+          "activo"
+        ],
+        "title": "ConceptoPropiedadOut"
+      },
+      "DetalleOut": {
+        "properties": {
+          "concepto_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Concepto Id"
+          },
+          "concepto": {
+            "type": "string",
+            "title": "Concepto"
+          },
+          "importe": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Importe",
+            "examples": [
+              "15000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "concepto_id",
+          "concepto",
+          "importe"
+        ],
+        "title": "DetalleOut"
+      },
+      "ErrorRespuesta": {
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "title": "Codigo"
+          },
+          "mensaje": {
+            "type": "string",
+            "title": "Mensaje"
+          },
+          "detalle": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Detalle"
+          }
+        },
+        "type": "object",
+        "required": [
+          "codigo",
+          "mensaje"
+        ],
+        "title": "ErrorRespuesta"
+      },
+      "FilaChecklist": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "concepto_propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Concepto Propiedad Id"
+          },
+          "concepto": {
+            "type": "string",
+            "title": "Concepto"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "pendiente",
+              "cargado",
+              "no_corresponde"
+            ],
+            "title": "Estado"
+          },
+          "importe_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importe Id"
+          },
+          "importe": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+                "examples": [
+                  "15000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importe"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "concepto_propiedad_id",
+          "concepto",
+          "estado"
+        ],
+        "title": "FilaChecklist"
+      },
+      "ImporteCorregir": {
+        "properties": {
+          "importe": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Importe",
+            "examples": [
+              "15000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "importe"
+        ],
+        "title": "ImporteCorregir",
+        "description": "HU-13: la auditoría guarda el valor anterior."
+      },
+      "ImporteCrear": {
+        "properties": {
+          "propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propiedad Id"
+          },
+          "periodo": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-01$",
+            "format": "date",
+            "title": "Periodo",
+            "examples": [
+              "2026-09-01"
+            ]
+          },
+          "concepto_propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Concepto Propiedad Id"
+          },
+          "importe": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Importe",
+            "examples": [
+              "15000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "propiedad_id",
+          "periodo",
+          "concepto_propiedad_id",
+          "importe"
+        ],
+        "title": "ImporteCrear",
+        "description": "HU-08: admite negativos (notas de crédito) y 0."
+      },
+      "ImporteOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "concepto_propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Concepto Propiedad Id"
+          },
+          "periodo": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-01$",
+            "format": "date",
+            "title": "Periodo",
+            "examples": [
+              "2026-09-01"
+            ]
+          },
+          "importe": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Importe",
+            "examples": [
+              "15000.00"
+            ]
+          },
+          "cargado_por": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cargado Por"
+          },
+          "fecha_carga": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Carga"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "concepto_propiedad_id",
+          "periodo",
+          "importe",
+          "cargado_por",
+          "fecha_carga"
+        ],
+        "title": "ImporteOut"
+      },
+      "NoCorrespondeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "concepto_propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Concepto Propiedad Id"
+          },
+          "concepto": {
+            "type": "string",
+            "title": "Concepto"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "pendiente",
+              "cargado",
+              "no_corresponde"
+            ],
+            "title": "Estado"
+          },
+          "importe_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importe Id"
+          },
+          "importe": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+                "examples": [
+                  "15000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importe"
+          },
+          "estado_anterior": {
+            "type": "string",
+            "enum": [
+              "pendiente",
+              "cargado",
+              "no_corresponde"
+            ],
+            "title": "Estado Anterior"
+          },
+          "importe_eliminado": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+                "examples": [
+                  "15000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importe Eliminado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "concepto_propiedad_id",
+          "concepto",
+          "estado",
+          "estado_anterior"
+        ],
+        "title": "NoCorrespondeOut",
+        "description": "HU-09: la fila queda en no_corresponde, sin importe.\n\nSi estaba `cargado`, `importe_eliminado` trae el valor borrado (también queda en auditoría).\nSi ya estaba `no_corresponde`, la respuesta es idempotente: estado_anterior = no_corresponde."
+      },
+      "PreliquidacionCrear": {
+        "properties": {
+          "propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propiedad Id"
+          },
+          "periodo": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-01$",
+            "format": "date",
+            "title": "Periodo",
+            "examples": [
+              "2026-09-01"
+            ]
+          },
+          "confirmar_pendientes": {
+            "type": "boolean",
+            "title": "Confirmar Pendientes",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "propiedad_id",
+          "periodo"
+        ],
+        "title": "PreliquidacionCrear",
+        "description": "HU-11 / HU-14: genera la versión siguiente (máxima + 1)."
+      },
+      "PreliquidacionOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propiedad Id"
+          },
+          "periodo": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-01$",
+            "format": "date",
+            "title": "Periodo",
+            "examples": [
+              "2026-09-01"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "importe_total": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Importe Total",
+            "examples": [
+              "15000.00"
+            ]
+          },
+          "generado_por": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Generado Por"
+          },
+          "generado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generado En"
+          },
+          "detalle": {
+            "items": {
+              "$ref": "#/components/schemas/DetalleOut"
+            },
+            "type": "array",
+            "title": "Detalle"
+          },
+          "advertencias": {
+            "items": {
+              "$ref": "#/components/schemas/AdvertenciaOut"
+            },
+            "type": "array",
+            "title": "Advertencias"
+          },
+          "reparto": {
+            "items": {
+              "$ref": "#/components/schemas/RepartoOut"
+            },
+            "type": "array",
+            "title": "Reparto"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "propiedad_id",
+          "periodo",
+          "version",
+          "importe_total",
+          "generado_por",
+          "generado_en",
+          "detalle",
+          "advertencias",
+          "reparto"
+        ],
+        "title": "PreliquidacionOut",
+        "description": "Snapshot completo e inmutable de una versión."
+      },
+      "PreliquidacionResumen": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "propiedad_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propiedad Id"
+          },
+          "periodo": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-01$",
+            "format": "date",
+            "title": "Periodo",
+            "examples": [
+              "2026-09-01"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "importe_total": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Importe Total",
+            "examples": [
+              "15000.00"
+            ]
+          },
+          "generado_por": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Generado Por"
+          },
+          "generado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generado En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "propiedad_id",
+          "periodo",
+          "version",
+          "importe_total",
+          "generado_por",
+          "generado_en"
+        ],
+        "title": "PreliquidacionResumen",
+        "description": "Cabecera de una versión (listado de versiones de HU-12)."
+      },
+      "PropiedadActualizar": {
+        "properties": {
+          "direccion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direccion"
+          },
+          "localidad": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Localidad"
+          },
+          "estado": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "activa",
+                  "inactiva"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estado"
+          }
+        },
+        "type": "object",
+        "title": "PropiedadActualizar"
+      },
+      "PropiedadCrear": {
+        "properties": {
+          "direccion": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Direccion"
+          },
+          "localidad": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Localidad"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "activa",
+              "inactiva"
+            ],
+            "title": "Estado",
+            "default": "activa"
+          }
+        },
+        "type": "object",
+        "required": [
+          "direccion"
+        ],
+        "title": "PropiedadCrear"
+      },
+      "PropiedadOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "direccion": {
+            "type": "string",
+            "title": "Direccion"
+          },
+          "localidad": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Localidad"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "activa",
+              "inactiva"
+            ],
+            "title": "Estado"
+          },
+          "fecha_alta": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Alta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "direccion",
+          "estado",
+          "fecha_alta"
+        ],
+        "title": "PropiedadOut"
+      },
+      "PropietarioActualizar": {
+        "properties": {
+          "nombre": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre"
+          },
+          "cuit_dni": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cuit Dni"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "telefono": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefono"
+          }
+        },
+        "type": "object",
+        "title": "PropietarioActualizar"
+      },
+      "PropietarioCrear": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Nombre"
+          },
+          "cuit_dni": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cuit Dni"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "telefono": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefono"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre"
+        ],
+        "title": "PropietarioCrear"
+      },
+      "PropietarioOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "cuit_dni": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cuit Dni"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "telefono": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefono"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "activa",
+              "inactiva"
+            ],
+            "title": "Estado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "estado"
+        ],
+        "title": "PropietarioOut"
+      },
+      "RepartoEntrada": {
+        "properties": {
+          "propietario_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propietario Id"
+          },
+          "porcentaje": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Porcentaje",
+            "examples": [
+              "15000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "propietario_id",
+          "porcentaje"
+        ],
+        "title": "RepartoEntrada"
+      },
+      "RepartoOut": {
+        "properties": {
+          "propietario_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propietario Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "porcentaje_aplicado": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Porcentaje Aplicado",
+            "examples": [
+              "15000.00"
+            ]
+          },
+          "importe_correspondiente": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Importe Correspondiente",
+            "examples": [
+              "15000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "propietario_id",
+          "nombre",
+          "porcentaje_aplicado",
+          "importe_correspondiente"
+        ],
+        "title": "RepartoOut"
+      },
+      "RepartoVigente": {
+        "properties": {
+          "propietario_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Propietario Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "porcentaje": {
+            "type": "string",
+            "pattern": "^-?\\d+(\\.\\d{1,2})?$",
+            "title": "Porcentaje",
+            "examples": [
+              "15000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "propietario_id",
+          "nombre",
+          "porcentaje"
+        ],
+        "title": "RepartoVigente"
+      },
+      "Usuario": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "rol": {
+            "type": "string",
+            "title": "Rol"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "email",
+          "rol",
+          "activo"
+        ],
+        "title": "Usuario"
+      },
+      "UsuarioActualizar": {
+        "properties": {
+          "nombre": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre"
+          },
+          "rol": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "admin",
+                  "operador"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rol"
+          }
+        },
+        "type": "object",
+        "title": "UsuarioActualizar"
+      },
+      "UsuarioCrear": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "title": "Email"
+          },
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Nombre"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "operador"
+            ],
+            "title": "Rol"
+          },
+          "contrasena": {
+            "type": "string",
+            "minLength": 6,
+            "title": "Contrasena"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "nombre",
+          "rol",
+          "contrasena"
+        ],
+        "title": "UsuarioCrear"
+      },
+      "UsuarioOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "operador"
+            ],
+            "title": "Rol"
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "email",
+          "rol",
+          "activo"
+        ],
+        "title": "UsuarioOut"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
