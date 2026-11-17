@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import pytest
+from dotenv import dotenv_values
 
 TEST_SECRET = "secreto-de-pruebas-secreto-de-pruebas-0123456789"
 _HOSTS_LOCALES = {"localhost", "127.0.0.1", "::1", "postgres"}
@@ -16,6 +17,7 @@ AUTH_SIMULADO = """
 CREATE SCHEMA auth;
 CREATE TABLE auth.users (id UUID PRIMARY KEY);
 """
+_ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 
 
 def _fijar_base_de_pruebas() -> str:
@@ -24,9 +26,11 @@ def _fijar_base_de_pruebas() -> str:
 
     Se ignora DATABASE_URL (que puede venir de backend/.env y apuntar a Supabase).
     """
-    url = os.environ.get("TEST_DATABASE_URL")
+    # El entorno de la terminal manda; si no está, se lee backend/.env
+    url = os.environ.get("TEST_DATABASE_URL") or dotenv_values(_ENV_FILE).get("TEST_DATABASE_URL")
     if not url:
-        pytest.exit("Falta TEST_DATABASE_URL: los tests no usan DATABASE_URL.")
+        pytest.exit("Falta TEST_DATABASE_URL (en el entorno o en backend/.env): "
+                    "los tests no usan DATABASE_URL.")
     partes = urlparse(url)
     if partes.hostname not in _HOSTS_LOCALES:
         pytest.exit(f"TEST_DATABASE_URL apunta a '{partes.hostname}', no a una base local. Abortado.")
