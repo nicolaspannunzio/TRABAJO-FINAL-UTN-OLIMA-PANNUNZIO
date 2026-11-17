@@ -1,12 +1,15 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core import db
 from app.core.config import get_settings
+from app.core.contract import errores
+from app.core.deps import get_current_user
 from app.core.errors import register_error_handlers
+from app.core.me import router as me
 from app.modules.advertencias.router import router as advertencias
 from app.modules.checklist.router import router as checklist
 from app.modules.conceptos.router import router as conceptos
@@ -16,10 +19,6 @@ from app.modules.preliquidaciones.router import router as preliquidaciones
 from app.modules.propiedades.router import router as propiedades
 from app.modules.reparto.router import router as reparto
 from app.modules.usuarios.router import router as usuarios
-from fastapi import Depends, FastAPI
-from app.core.deps import get_current_user
-from app.core.me import router as me
-
 
 
 @asynccontextmanager
@@ -38,9 +37,12 @@ app.add_middleware(
 )
 register_error_handlers(app)
 
+# 401 y 403 aplican a toda ruta protegida. El 422 se declara acá para que el contrato
+# muestre {codigo, mensaje, detalle} y no el HTTPValidationError por defecto de FastAPI.
 for r in (usuarios, propiedades, conceptos, plantilla, reparto,
           checklist, importes, advertencias, preliquidaciones, me):
-    app.include_router(r, dependencies=[Depends(get_current_user)])
+    app.include_router(r, dependencies=[Depends(get_current_user)],
+                       responses=errores(401, 403, 422))
 
 
 @app.get("/health", tags=["health"])
