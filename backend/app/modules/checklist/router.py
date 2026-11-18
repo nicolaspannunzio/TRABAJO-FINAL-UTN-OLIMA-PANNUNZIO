@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 from app.core.contract import Periodo, errores
 from app.core.db import get_session
-from app.core.errors import no_implementado
+from app.core.deps import Usuario, get_current_user
 from app.modules.checklist import service
 from app.modules.checklist.schemas import ChecklistAbrir, ChecklistOut, NoCorrespondeOut
 
@@ -33,7 +33,8 @@ def obtener_checklist(propiedad_id: UUID, periodo: Periodo,
 
 @router.post("/{fila_id}/no-corresponde", response_model=NoCorrespondeOut,
              responses=errores(404))
-def marcar_no_corresponde(fila_id: UUID):
+def marcar_no_corresponde(fila_id: UUID, session: Session = Depends(get_session),
+                          usuario: Usuario = Depends(get_current_user)):
     # HU-09 / RN-25: sobre pendiente o cargado; si estaba cargado borra el importe y lo audita,
     # todo en una transacción. Sobre no_corresponde responde 200 sin cambios.
-    raise no_implementado()
+    return service.marcar_no_corresponde(session, usuario.id, fila_id)

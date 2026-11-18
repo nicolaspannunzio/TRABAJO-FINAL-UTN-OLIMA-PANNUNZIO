@@ -119,6 +119,19 @@ def fila_por_concepto(session: Session, propiedad_id: UUID, periodo: date,
     return session.connection().execute(stmt).mappings().first()
 
 
+def fila_para_actualizar(session: Session, fila_id: UUID):
+    """{id, propiedad_id, periodo, concepto_propiedad_id, estado} de la fila, o None.
+
+    FOR UPDATE: bloquea la fila hasta el commit (mismo orden que la carga de importes:
+    primero la fila del checklist, después el importe).
+    """
+    stmt = (select(_checklist.c.id, _checklist.c.propiedad_id, _checklist.c.periodo,
+                   _checklist.c.concepto_propiedad_id, _checklist.c.estado)
+            .where(_checklist.c.id == fila_id)
+            .with_for_update())
+    return session.connection().execute(stmt).mappings().first()
+
+
 def cambiar_estado(session: Session, fila_id: UUID, estado: str) -> None:
     """No confirma: el commit lo hace el service que arma la transacción."""
     stmt = update(_checklist).where(_checklist.c.id == fila_id).values(estado=estado)
