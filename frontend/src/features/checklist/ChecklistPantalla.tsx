@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useMemo, useState, type CSSProperties } from 'react'
 import { useForm } from '@tanstack/react-form'
 import {
   createColumnHelper,
@@ -11,6 +11,7 @@ import {
 import { Cargando } from '../../components/Cargando'
 import { ApiError } from '../../services/api'
 import { CargaImporte } from '../importes/CargaImporte'
+import { MarcarNoCorresponde } from './MarcarNoCorresponde'
 import { useAbrirPeriodo, useChecklist, usePropiedadesOpciones } from './queries'
 import type { EstadoChecklist, FilaChecklist } from './tipos'
 
@@ -20,6 +21,14 @@ const ETIQUETA_ESTADO: Record<EstadoChecklist, string> = {
   pendiente: 'Pendiente',
   cargado: 'Cargado',
   no_corresponde: 'No corresponde',
+}
+
+// HU-09: cada estado se ve distinto. Un concepto en $0 está "Cargado" con importe;
+// uno que no corresponde no tiene importe y se muestra atenuado.
+const ESTILO_ESTADO: Record<EstadoChecklist, CSSProperties> = {
+  pendiente: { color: '#b45309', fontWeight: 'bold' },
+  cargado: { color: '#15803d' },
+  no_corresponde: { color: '#6b7280', fontStyle: 'italic' },
 }
 
 // El texto se elige según `codigo`, nunca según el mensaje del backend.
@@ -202,20 +211,30 @@ const crearColumnas = (propiedadId: string, periodo: string) => [
   col.accessor('concepto', { header: 'Concepto' }),
   col.accessor('estado', {
     header: 'Estado',
-    cell: (i) => <span data-estado={i.getValue()}>{ETIQUETA_ESTADO[i.getValue()]}</span>,
+    cell: (i) => (
+      <span data-estado={i.getValue()} style={ESTILO_ESTADO[i.getValue()]}>
+        {ETIQUETA_ESTADO[i.getValue()]}
+      </span>
+    ),
   }),
   col.accessor('importe', {
     header: 'Importe',
     // El importe viaja como cadena decimal: se muestra tal cual, sin convertir a float.
     cell: (i) => {
       const v = i.getValue()
+      if (i.row.original.estado === 'no_corresponde') return <span style={ESTILO_ESTADO.no_corresponde}>No aplica</span>
       return v == null ? '—' : `$ ${v}`
     },
   }),
   col.display({
-    id: 'carga',
-    header: 'Cargar importe',
-    cell: (i) => <CargaImporte fila={i.row.original} propiedadId={propiedadId} periodo={periodo} />,
+    id: 'acciones',
+    header: 'Acciones',
+    cell: (i) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <CargaImporte fila={i.row.original} propiedadId={propiedadId} periodo={periodo} />
+        <MarcarNoCorresponde fila={i.row.original} propiedadId={propiedadId} periodo={periodo} />
+      </div>
+    ),
   }),
 ]
 
