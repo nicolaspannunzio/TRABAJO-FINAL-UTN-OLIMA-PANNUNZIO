@@ -15,6 +15,8 @@ import { MarcarNoCorresponde } from './MarcarNoCorresponde'
 import { useAbrirPeriodo, useChecklist, usePropiedadesOpciones } from './queries'
 import type { EstadoChecklist, FilaChecklist } from './tipos'
 
+import { PanelAdvertencias } from '../advertencias/PanelAdvertencias'
+
 // --- Textos de la interfaz ---------------------------------------------------
 
 const ETIQUETA_ESTADO: Record<EstadoChecklist, string> = {
@@ -196,6 +198,7 @@ function ChecklistDelPeriodo({ propiedadId, periodo }: Seleccion) {
             {filas.length} conceptos · {pendientes} pendiente{pendientes === 1 ? '' : 's'}
           </p>
           <TablaChecklist filas={filas} propiedadId={propiedadId} periodo={periodo} />
+          <PanelAdvertencias propiedadId={propiedadId} periodo={periodo} filas={filas} />
         </>
       )}
     </div>
