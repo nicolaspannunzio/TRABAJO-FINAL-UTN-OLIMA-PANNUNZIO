@@ -3,7 +3,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import insert
+from sqlalchemy import delete, insert, select
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 
@@ -37,3 +37,21 @@ def insertar(session: Session, concepto_propiedad_id: UUID, periodo: date,
         if getattr(diag, "constraint_name", None) == _UQ_IMPORTE:
             raise ImporteDuplicado from e
         raise
+
+
+def buscar_para_borrar(session: Session, concepto_propiedad_id: UUID, periodo: date):
+    """{id, importe, cargado_por, fecha_carga} del importe del período, o None.
+
+    FOR UPDATE: nadie lo modifica entre que se lee (para auditarlo) y se borra.
+    """
+    stmt = (select(_importe.c.id, _importe.c.importe, _importe.c.cargado_por,
+                   _importe.c.fecha_carga)
+            .where(_importe.c.concepto_propiedad_id == concepto_propiedad_id,
+                   _importe.c.periodo == periodo)
+            .with_for_update())
+    return session.connection().execute(stmt).mappings().first()
+
+
+def borrar(session: Session, importe_id: UUID) -> None:
+    """No confirma: el commit lo hace el service que arma la transacción."""
+    session.connection().execute(delete(_importe).where(_importe.c.id == importe_id))
