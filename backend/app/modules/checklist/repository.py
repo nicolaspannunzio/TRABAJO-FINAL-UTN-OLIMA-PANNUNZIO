@@ -4,13 +4,13 @@
 Tablas de otros módulos (convención 2): se leen con table()/column() y joins explícitos,
 sin importar su código.
 - propiedad, concepto, concepto_propiedad: módulos de A.
-- importe_mensual: módulo importes (B). Todavía no tiene models.py, por eso también se lee
-  con table(); en B1 el LEFT JOIN siempre da NULL, a partir de B2 trae el importe cargado.
+- importe_mensual: módulo importes (B). Se lee con table() para que checklist no dependa
+  de importes (importes sí usa este repositorio: los dos son de B).
 """
 from datetime import date
 from uuid import UUID
 
-from sqlalchemy import and_, column, exists, select, table
+from sqlalchemy import and_, column, exists, select, table, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlmodel import Session
 
@@ -64,9 +64,12 @@ def insertar_filas(session: Session, propiedad_id: UUID, periodo: date,
     session.connection().execute(stmt)
 
 
-def filas(session: Session, propiedad_id: UUID, periodo: date):
-    """Filas del checklist con el nombre del concepto y, si existe, su importe."""
-    stmt = (
+def _select_filas():
+    """Filas del checklist con el nombre del concepto y, si existe, su importe.
+
+    Devuelve las columnas de FilaChecklist.
+    """
+    return (
         select(
             _checklist.c.id,
             _checklist.c.concepto_propiedad_id,
@@ -85,7 +88,38 @@ def filas(session: Session, propiedad_id: UUID, periodo: date):
                 _importe.c.periodo == _checklist.c.periodo,
             ))
         )
-        .where(_checklist.c.propiedad_id == propiedad_id, _checklist.c.periodo == periodo)
-        .order_by(_concepto.c.nombre)
     )
+
+
+def filas(session: Session, propiedad_id: UUID, periodo: date):
+    stmt = (_select_filas()
+            .where(_checklist.c.propiedad_id == propiedad_id, _checklist.c.periodo == periodo)
+            .order_by(_concepto.c.nombre))
     return session.connection().execute(stmt).mappings().all()
+
+
+def fila(session: Session, fila_id: UUID):
+    """Una fila con el formato de FilaChecklist, o None si no existe."""
+    stmt = _select_filas().where(_checklist.c.id == fila_id)
+    return session.connection().execute(stmt).mappings().first()
+
+
+def fila_por_concepto(session: Session, propiedad_id: UUID, periodo: date,
+                      concepto_propiedad_id: UUID):
+    """{id, estado} de la fila del checklist para ese concepto, o None si no tiene fila.
+
+    FOR UPDATE: bloquea la fila hasta el commit, para que otra operación sobre la misma
+    fila (por ejemplo marcar no_corresponde) espere a que termine la carga.
+    """
+    stmt = (select(_checklist.c.id, _checklist.c.estado)
+            .where(_checklist.c.propiedad_id == propiedad_id,
+                   _checklist.c.periodo == periodo,
+                   _checklist.c.concepto_propiedad_id == concepto_propiedad_id)
+            .with_for_update())
+    return session.connection().execute(stmt).mappings().first()
+
+
+def cambiar_estado(session: Session, fila_id: UUID, estado: str) -> None:
+    """No confirma: el commit lo hace el service que arma la transacción."""
+    stmt = update(_checklist).where(_checklist.c.id == fila_id).values(estado=estado)
+    session.connection().execute(stmt)
