@@ -32,15 +32,16 @@ def crear_usuario(datos: UsuarioCrear, session: Session = Depends(get_session),
     return service.crear_usuario(session, auth_admin, admin.id, datos)
 
 
-@router.patch("/{usuario_id}", response_model=UsuarioOut, responses=errores(404))
+@router.patch("/{usuario_id}", response_model=UsuarioOut, responses=errores(404, 409))
 def actualizar_usuario(usuario_id: UUID, datos: UsuarioActualizar,
                        session: Session = Depends(get_session),
                        admin: Usuario = Depends(require_admin)):
     return service.actualizar_usuario(session, admin.id, usuario_id, datos)
 
 
-@router.post("/{usuario_id}/baja", response_model=UsuarioOut, responses=errores(404))
+@router.post("/{usuario_id}/baja", response_model=UsuarioOut, responses=errores(404, 409))
 def dar_de_baja_usuario(usuario_id: UUID, session: Session = Depends(get_session),
                         admin: Usuario = Depends(require_admin)):
     # Baja lógica (RN-03): activo = false, la fila no se borra. Queda en auditoría.
+    # 409 si el admin intenta darse de baja a sí mismo (lo mismo al cambiarse el rol en PATCH).
     return service.dar_de_baja(session, admin.id, usuario_id)

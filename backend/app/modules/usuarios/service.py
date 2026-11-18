@@ -29,6 +29,12 @@ def _email_duplicado(email: str) -> AppError:
                     {"email": email})
 
 
+def _autoedicion(accion: str) -> AppError:
+    # Evita que el único admin se deje sin acceso a la gestión de usuarios.
+    return AppError(409, "autoedicion_no_permitida",
+                    f"Un administrador no puede {accion} a sí mismo; lo tiene que hacer otro administrador")
+
+
 def listar(session: Session) -> list[UsuarioOut]:
     return [UsuarioOut(**f) for f in repository.listar(session)]
 
@@ -90,6 +96,8 @@ def actualizar_usuario(session: Session, admin_id: UUID, usuario_id: UUID,
         cambios["nombre"] = datos.nombre
         antes["nombre"], despues["nombre"] = actual["nombre"], datos.nombre
     if datos.rol is not None and datos.rol != actual["rol"]:
+        if usuario_id == admin_id:
+            raise _autoedicion("cambiarse el rol")
         cambios["rol_id"] = repository.id_del_rol(session, datos.rol)
         antes["rol"], despues["rol"] = actual["rol"], datos.rol
 
@@ -103,7 +111,9 @@ def actualizar_usuario(session: Session, admin_id: UUID, usuario_id: UUID,
 
 def dar_de_baja(session: Session, admin_id: UUID, usuario_id: UUID) -> UsuarioOut:
     """Baja lógica (RN-03): `activo = false`, la fila no se borra. Idempotente: si ya
-    estaba inactivo responde 200 sin cambios ni auditoría."""
+    estaba inactivo responde 200 sin cambios ni auditoría. Un admin no se da de baja a sí mismo."""
+    if usuario_id == admin_id:
+        raise _autoedicion("darse de baja")
     actual = repository.obtener(session, usuario_id)
     if actual is None:
         raise _no_encontrado(usuario_id)

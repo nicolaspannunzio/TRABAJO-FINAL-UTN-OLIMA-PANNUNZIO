@@ -290,6 +290,40 @@ def test_listar_incluye_al_usuario_creado(client, admin, auth_fake):
     assert uid in [u["id"] for u in r.json()]
 
 
+# --- Un admin no se deja sin acceso a sí mismo --------------------------------------
+
+def test_admin_no_puede_darse_de_baja_a_si_mismo(client, admin):
+    r = client.post(f"/usuarios/{admin['uid']}/baja", headers=admin["headers"])
+
+    assert r.status_code == 409 and r.json()["codigo"] == "autoedicion_no_permitida"
+    assert _fila(admin["uid"])["activo"] is True
+    assert _auditoria(admin["uid"], "baja_usuario") == []
+
+
+def test_admin_no_puede_cambiarse_el_propio_rol(client, admin):
+    r = client.patch(f"/usuarios/{admin['uid']}", headers=admin["headers"], json={"rol": "operador"})
+
+    assert r.status_code == 409 and r.json()["codigo"] == "autoedicion_no_permitida"
+    assert _fila(admin["uid"])["rol"] == "admin"
+    assert _auditoria(admin["uid"], "edicion_usuario") == []
+
+
+def test_admin_si_puede_editar_su_propio_nombre(client, admin):
+    # Mandar su mismo rol no es un cambio de rol: se permite.
+    r = client.patch(f"/usuarios/{admin['uid']}", headers=admin["headers"],
+                     json={"nombre": "Mi Nombre Nuevo", "rol": "admin"})
+
+    assert r.status_code == 200 and r.json()["nombre"] == "Mi Nombre Nuevo"
+
+
+def test_admin_si_puede_dar_de_baja_a_otro_admin(client, admin, auth_fake):
+    otro = uuid.UUID(_alta(client, admin, rol="admin").json()["id"])
+
+    r = client.post(f"/usuarios/{otro}/baja", headers=admin["headers"])
+
+    assert r.status_code == 200 and r.json()["activo"] is False
+
+
 # --- El operador recibe 403 en todo --------------------------------------------------
 
 def test_operador_recibe_403_y_no_se_crea_nada(client, crear_usuario, make_token, auth, auth_fake):

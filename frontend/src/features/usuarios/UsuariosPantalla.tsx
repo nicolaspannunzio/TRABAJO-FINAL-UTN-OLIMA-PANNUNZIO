@@ -33,6 +33,8 @@ function textoError(error: unknown): string {
         return 'Ya existe un usuario con ese email.'
       case 'contrasena_invalida':
         return 'La contraseña no cumple los requisitos. Probá con una más larga.'
+      case 'autoedicion_no_permitida':
+        return 'No podés darte de baja ni cambiarte el rol a vos mismo. Pedile a otro administrador que lo haga.'
       case 'usuario_no_encontrado':
         return 'El usuario ya no existe. Se actualizó la lista.'
       case 'validacion':
