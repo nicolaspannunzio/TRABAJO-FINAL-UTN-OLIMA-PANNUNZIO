@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import {
   createColumnHelper,
@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-table'
 import { Cargando } from '../../components/Cargando'
 import { ApiError } from '../../services/api'
+import { CargaImporte } from '../importes/CargaImporte'
 import { useAbrirPeriodo, useChecklist, usePropiedadesOpciones } from './queries'
 import type { EstadoChecklist, FilaChecklist } from './tipos'
 
@@ -185,7 +186,7 @@ function ChecklistDelPeriodo({ propiedadId, periodo }: Seleccion) {
           <p>
             {filas.length} conceptos · {pendientes} pendiente{pendientes === 1 ? '' : 's'}
           </p>
-          <TablaChecklist filas={filas} />
+          <TablaChecklist filas={filas} propiedadId={propiedadId} periodo={periodo} />
         </>
       )}
     </div>
@@ -196,7 +197,8 @@ function ChecklistDelPeriodo({ propiedadId, periodo }: Seleccion) {
 
 const col = createColumnHelper<FilaChecklist>()
 
-const columnas = [
+// Las columnas dependen de la propiedad y el período porque la carga (HU-08) los necesita.
+const crearColumnas = (propiedadId: string, periodo: string) => [
   col.accessor('concepto', { header: 'Concepto' }),
   col.accessor('estado', {
     header: 'Estado',
@@ -210,17 +212,31 @@ const columnas = [
       return v == null ? '—' : `$ ${v}`
     },
   }),
+  col.display({
+    id: 'carga',
+    header: 'Cargar importe',
+    cell: (i) => <CargaImporte fila={i.row.original} propiedadId={propiedadId} periodo={periodo} />,
+  }),
 ]
 
-function TablaChecklist({ filas }: { filas: FilaChecklist[] }) {
+interface TablaProps {
+  filas: FilaChecklist[]
+  propiedadId: string
+  periodo: string
+}
+
+function TablaChecklist({ filas, propiedadId, periodo }: TablaProps) {
   'use no memo'
   const [sorting, setSorting] = useState<SortingState>([])
+  const columnas = useMemo(() => crearColumnas(propiedadId, periodo), [propiedadId, periodo])
 
   // TanStack Table devuelve funciones no memoizables: el compilador de React omite este componente a propósito.
   // eslint-disable-next-line react-hooks/incompatible-library
   const tabla = useReactTable({
     data: filas,
     columns: columnas,
+    // id de la fila del checklist (no el índice): al ordenar, cada formulario de carga sigue a su fila.
+    getRowId: (f) => f.id,
     state: { sorting },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
