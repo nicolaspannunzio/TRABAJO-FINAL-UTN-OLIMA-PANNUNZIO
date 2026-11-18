@@ -1161,6 +1161,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorRespuesta"];
                 };
             };
+            /** @description Conflicto con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorRespuesta"];
+                };
+            };
             /** @description Datos de entrada inválidos */
             422: {
                 headers: {
@@ -1212,6 +1221,15 @@ export interface operations {
             };
             /** @description El recurso no existe */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorRespuesta"];
+                };
+            };
+            /** @description Conflicto con el estado actual */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
