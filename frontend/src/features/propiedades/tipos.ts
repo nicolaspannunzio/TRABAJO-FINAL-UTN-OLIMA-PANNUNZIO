@@ -1,8 +1,9 @@
-// Provisorio: en F0-08 estos tipos pasan a generarse desde docs/openapi.json.
-export interface Propiedad {
-  id: string
-  direccion: string
-  localidad: string | null
-  estado: string
-  fecha_alta: string
-}
+// Tipos tomados del contrato generado (docs/openapi.json → types/api.ts).
+import type { components } from '../../types/api'
+
+export type Propiedad = components['schemas']['PropiedadOut']
+export type PropiedadCrear = components['schemas']['PropiedadCrear']
+export type PropiedadActualizar = components['schemas']['PropiedadActualizar']
+export type Propietario = components['schemas']['PropietarioOut']
+export type PropietarioCrear = components['schemas']['PropietarioCrear']
+export type PropietarioActualizar = components['schemas']['PropietarioActualizar']
