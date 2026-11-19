@@ -1,7 +1,8 @@
-from uuid import uuid4
-
-from app.main import app
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
+from app.core.errors import no_implementado, register_error_handlers
+from app.main import app
 
 
 def test_health_ok():
@@ -11,9 +12,22 @@ def test_health_ok():
     assert r.json() == {"estado": "ok", "base": "ok"}
 
 
-def test_stub_devuelve_formato_de_error(client, crear_usuario, make_token, auth):
-    uid = crear_usuario()
-    # Cualquier ruta que siga en stub sirve; hoy es la consulta de una versión de preliquidación (B7).
-    r = client.get(f"/preliquidaciones/{uuid4()}", headers=auth(make_token(uid)))
+def test_stub_devuelve_formato_de_error():
+    """Una ruta en stub (no_implementado) responde 501 con {codigo, mensaje, detalle}.
+
+    Usa una app mínima con los mismos manejadores de error, en lugar de una ruta real de la
+    API: así el test no se rompe cada vez que una unidad implementa la ruta que se usaba
+    de ejemplo (pasó con /preliquidaciones/{id} en B7).
+    """
+    mini = FastAPI()
+    register_error_handlers(mini)
+
+    @mini.get("/stub")
+    def stub():
+        raise no_implementado()
+
+    with TestClient(mini) as c:
+        r = c.get("/stub")
     assert r.status_code == 501
+    assert r.json()["codigo"] == "no_implementado"
     assert set(r.json()) == {"codigo", "mensaje", "detalle"}
