@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ApiError } from '../../services/api'
-import { useGenerarPreliquidacion } from './queries'
+import { useGenerarPreliquidacion, useVersiones } from './queries'
 import { ResumenPreliquidacion } from './ResumenPreliquidacion'
 import type { ConceptoPendiente, PreliquidacionOut } from './tipos'
 
@@ -41,10 +41,17 @@ interface Props {
  * HU-11: botón para generar la preliquidación del período.
  * Si quedan conceptos pendientes, el backend no genera nada (RN-18) y la pantalla muestra
  * cuáles son; el usuario puede cancelar o confirmar y generar igual.
+ *
+ * HU-14: si el período ya tiene versiones, el botón genera la siguiente. La nueva pasa a
+ * ser la vigente y las anteriores se conservan sin cambios (RN-22, RN-23).
  */
 export function GenerarPreliquidacion({ propiedadId, periodo }: Props) {
   const generar = useGenerarPreliquidacion()
+  const versiones = useVersiones(propiedadId, periodo)
   const [generada, setGenerada] = useState<PreliquidacionOut | null>(null)
+
+  // Última versión ya generada (la vigente), si hay alguna.
+  const vigente = versiones.data?.[versiones.data.length - 1]
 
   const pendientes = pendientesDe(generar.error)
 
@@ -59,8 +66,15 @@ export function GenerarPreliquidacion({ propiedadId, periodo }: Props) {
   return (
     <section style={{ marginTop: '1.5rem' }}>
       <h3>Preliquidación</h3>
+      {vigente && !generada && (
+        <p style={{ fontSize: '0.9em' }}>
+          Vigente: <strong>versión {vigente.version}</strong> (total $ {vigente.importe_total}). Si corregiste
+          algún importe, generá una nueva versión: será la {vigente.version + 1} y pasará a ser la vigente.
+          Las versiones anteriores se conservan sin cambios y se consultan en "Preliquidaciones".
+        </p>
+      )}
       <button type="button" disabled={generar.isPending} onClick={() => enviar(false)}>
-        {generar.isPending ? 'Generando…' : 'Generar preliquidación'}
+        {generar.isPending ? 'Generando…' : vigente ? 'Generar nueva versión' : 'Generar preliquidación'}
       </button>
 
       {pendientes && (
@@ -93,7 +107,7 @@ export function GenerarPreliquidacion({ propiedadId, periodo }: Props) {
         </p>
       )}
 
-      {generada && <ResumenPreliquidacion preliquidacion={generada} />}
+      {generada && <ResumenPreliquidacion preliquidacion={generada} vigente />}
     </section>
   )
 }
