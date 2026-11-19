@@ -11,6 +11,7 @@ import {
 import { Cargando } from '../../components/Cargando'
 import { ApiError } from '../../services/api'
 import { CargaImporte } from '../importes/CargaImporte'
+import { CorregirImporte } from '../importes/CorregirImporte'
 import { MarcarNoCorresponde } from './MarcarNoCorresponde'
 import { useAbrirPeriodo, useChecklist, usePropiedadesOpciones } from './queries'
 import type { EstadoChecklist, FilaChecklist } from './tipos'
@@ -241,6 +242,7 @@ const crearColumnas = (propiedadId: string, periodo: string) => [
     cell: (i) => (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
         <CargaImporte fila={i.row.original} propiedadId={propiedadId} periodo={periodo} />
+        <CorregirImporte fila={i.row.original} propiedadId={propiedadId} periodo={periodo} />
         <MarcarNoCorresponde fila={i.row.original} propiedadId={propiedadId} periodo={periodo} />
       </div>
     ),
