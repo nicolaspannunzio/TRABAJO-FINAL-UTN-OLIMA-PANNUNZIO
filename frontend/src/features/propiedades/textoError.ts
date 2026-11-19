@@ -8,6 +8,10 @@ export function textoError(error: unknown, accion: string): string {
         return 'La propiedad ya no existe. Recargá la lista.'
       case 'propietario_no_encontrado':
         return 'El propietario ya no existe. Recargá la lista.'
+      case 'propietario_repetido':
+        return 'Un propietario no puede aparecer dos veces en la misma propiedad.'
+      case 'reparto_suma_invalida':
+        return 'Los porcentajes tienen que sumar exactamente 100.'
       case 'validacion':
         return 'Revisá los datos: alguno no es válido.'
       case 'sin_conexion':

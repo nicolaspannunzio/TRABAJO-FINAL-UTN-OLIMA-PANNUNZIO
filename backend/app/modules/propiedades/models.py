@@ -6,9 +6,10 @@ El esquema sale de database/esquema_completo.sql (no se usa create_all()): los v
 defecto del DDL (id, estado, fecha_alta) los pone la base.
 """
 from datetime import datetime
+from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import Column, DateTime, text
+from sqlalchemy import Column, DateTime, Numeric, text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import Field, SQLModel
 
@@ -44,3 +45,16 @@ class Propietario(SQLModel, table=True):
     email: str | None = None
     telefono: str | None = None
     estado: str = Field(default="activa")  # CHECK (estado IN ('activa', 'inactiva'))
+
+
+class PropiedadPropietario(SQLModel, table=True):
+    __tablename__ = "propiedad_propietario"
+
+    id: UUID | None = Field(
+        default=None,
+        sa_column=Column(PG_UUID(as_uuid=True), primary_key=True,
+                         server_default=text("gen_random_uuid()")),
+    )
+    propiedad_id: UUID
+    propietario_id: UUID
+    porcentaje: Decimal = Field(sa_column=Column(Numeric(5, 2), nullable=False))

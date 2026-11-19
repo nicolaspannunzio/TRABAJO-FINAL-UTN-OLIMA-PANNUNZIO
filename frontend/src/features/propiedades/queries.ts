@@ -7,6 +7,8 @@ import type {
   Propietario,
   PropietarioActualizar,
   PropietarioCrear,
+  RepartoEntrada,
+  RepartoVigente
 } from './tipos'
 
 export const propiedadesKeys = {
@@ -70,5 +72,30 @@ export function useActualizarPropietario() {
     mutationFn: ({ id, datos }: { id: string; datos: PropietarioActualizar }) =>
       apiFetch<Propietario>(`/propietarios/${id}`, { method: 'PATCH', body: json(datos) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: propietariosKeys.lista }),
+  })
+}
+
+// --- Reparto (HU-04) -------------------------------------------------------------
+
+export const repartoKeys = {
+  de: (propiedadId: string) => ['propiedades', propiedadId, 'reparto'] as const,
+}
+
+export function useReparto(propiedadId: string) {
+  return useQuery({
+    queryKey: repartoKeys.de(propiedadId),
+    queryFn: () => apiFetch<RepartoVigente[]>(`/propiedades/${propiedadId}/propietarios`),
+  })
+}
+
+export function useGuardarReparto(propiedadId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (reparto: RepartoEntrada[]) =>
+      apiFetch<RepartoVigente[]>(`/propiedades/${propiedadId}/propietarios`, {
+        method: 'PUT',
+        body: json(reparto),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: repartoKeys.de(propiedadId) }),
   })
 }
