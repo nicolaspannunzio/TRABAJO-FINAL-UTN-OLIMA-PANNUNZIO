@@ -1,5 +1,7 @@
-from fastapi.testclient import TestClient
+from uuid import uuid4
+
 from app.main import app
+from fastapi.testclient import TestClient
 
 
 def test_health_ok():
@@ -11,6 +13,7 @@ def test_health_ok():
 
 def test_stub_devuelve_formato_de_error(client, crear_usuario, make_token, auth):
     uid = crear_usuario()
-    r = client.get("/conceptos", headers=auth(make_token(uid)))
+    # Cualquier ruta que siga en stub sirve; hoy es la consulta de una versión de preliquidación (B7).
+    r = client.get(f"/preliquidaciones/{uuid4()}", headers=auth(make_token(uid)))
     assert r.status_code == 501
     assert set(r.json()) == {"codigo", "mensaje", "detalle"}
