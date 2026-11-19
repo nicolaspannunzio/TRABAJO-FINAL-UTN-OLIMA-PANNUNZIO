@@ -156,5 +156,6 @@ erDiagram
 | `reparto` | `UNIQUE (preliquidacion_id, propietario_id)` |
 | `checklist_periodo`, `importe_mensual`, `preliquidacion` | `periodo` es el primer día del mes (`CHECK`) |
 | `preliquidacion`, `preliquidacion_detalle`, `preliquidacion_advertencia`, `reparto` | Snapshot inmutable: trigger que rechaza `UPDATE`, `DELETE` y `TRUNCATE`; sin `ON DELETE CASCADE` |
+| `concepto` | `UNIQUE INDEX uq_concepto_nombre_ci ON concepto (lower(nombre))` |
 
 La vista `preliquidacion_vigente` devuelve, por `(propiedad_id, periodo)`, la fila de `preliquidacion` con mayor `version`.
