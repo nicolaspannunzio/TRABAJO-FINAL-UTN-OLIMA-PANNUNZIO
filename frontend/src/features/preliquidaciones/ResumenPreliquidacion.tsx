@@ -10,12 +10,20 @@ const ETIQUETA_ADVERTENCIA: Record<TipoAdvertencia, string> = {
 // Los importes viajan como cadenas decimales: se muestran tal cual, nunca como float.
 const pesos = (v: string) => `$ ${v}`
 
+interface Props {
+  preliquidacion: PreliquidacionOut
+  /** Si se sabe, marca si es la versión vigente (la de mayor número). */
+  vigente?: boolean
+}
+
 /** Una versión de la preliquidación: cabecera, detalle, advertencias y reparto. */
-export function ResumenPreliquidacion({ preliquidacion: p }: { preliquidacion: PreliquidacionOut }) {
+export function ResumenPreliquidacion({ preliquidacion: p, vigente }: Props) {
   return (
-    <article style={{ border: '1px solid #d1d5db', padding: '1rem', marginTop: '1rem' }}>
+    <article style={{ border: `1px solid ${vigente ? '#15803d' : '#d1d5db'}`, padding: '1rem', marginTop: '1rem' }}>
       <h3 style={{ marginTop: 0 }}>
         Versión {p.version} · total {pesos(p.importe_total)}
+        {vigente === true && <span style={{ color: '#15803d' }}> · vigente</span>}
+        {vigente === false && <span style={{ color: '#6b7280' }}> · reemplazada por una versión posterior</span>}
       </h3>
       <p style={{ fontSize: '0.9em', color: '#6b7280' }}>
         Generada el {new Date(p.generado_en).toLocaleString('es-AR')}. Es un resumen para revisar,
