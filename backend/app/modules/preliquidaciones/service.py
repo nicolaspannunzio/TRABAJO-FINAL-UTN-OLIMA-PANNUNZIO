@@ -1,5 +1,6 @@
 # modules/preliquidaciones/service.py
 """HU-11: generar la preliquidación (RN-17 a RN-22, RN-24).
+HU-12: consultar versiones, la vigente y el detalle de cada una (RN-21, RN-22).
 
 Pasos, en una sola transacción:
  1. Validaciones que no escriben nada: propiedad (404), checklist (409), pendientes sin
@@ -24,7 +25,8 @@ from app import audit
 from app.core.errors import AppError
 from app.modules.advertencias import service as advertencias_service
 from app.modules.preliquidaciones import repository
-from app.modules.preliquidaciones.schemas import PreliquidacionCrear, PreliquidacionOut
+from app.modules.preliquidaciones.schemas import (PreliquidacionCrear, PreliquidacionOut,
+                                                  PreliquidacionResumen)
 from app.modules.reparto.service import repartir
 
 CIEN = Decimal("100")
@@ -124,3 +126,23 @@ def obtener(session: Session, preliquidacion_id: UUID) -> PreliquidacionOut:
         raise AppError(404, "preliquidacion_no_encontrada", "La preliquidación no existe",
                        {"preliquidacion_id": str(preliquidacion_id)})
     return PreliquidacionOut.model_validate(datos)
+
+
+def listar_versiones(session: Session, propiedad_id: UUID,
+                     periodo: date) -> list[PreliquidacionResumen]:
+    """Todas las versiones del período, ordenadas. Lista vacía si todavía no se generó ninguna."""
+    if not repository.propiedad_existe(session, propiedad_id):
+        raise AppError(404, "propiedad_no_encontrada", "La propiedad no existe",
+                       {"propiedad_id": str(propiedad_id)})
+    return [PreliquidacionResumen.model_validate(dict(c))
+            for c in repository.listar(session, propiedad_id, periodo)]
+
+
+def obtener_vigente(session: Session, propiedad_id: UUID, periodo: date) -> PreliquidacionOut:
+    """La versión de mayor número (RN-22), completa."""
+    preliquidacion_id = repository.id_vigente(session, propiedad_id, periodo)
+    if preliquidacion_id is None:
+        raise AppError(404, "preliquidacion_no_encontrada",
+                       "No hay preliquidaciones generadas para ese período",
+                       _detalle_error(propiedad_id, periodo))
+    return obtener(session, preliquidacion_id)

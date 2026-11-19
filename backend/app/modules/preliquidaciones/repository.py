@@ -22,6 +22,8 @@ _propiedad_propietario = table("propiedad_propietario", column("propiedad_id"),
                                column("propietario_id"), column("porcentaje"))
 _concepto = table("concepto", column("id"), column("nombre"))
 _concepto_propiedad = table("concepto_propiedad", column("id"), column("concepto_id"))
+# Vista de esquema_completo.sql: la versión de mayor número por propiedad y período (RN-22).
+_vigente = table("preliquidacion_vigente", column("id"), column("propiedad_id"), column("periodo"))
 _checklist = table("checklist_periodo", column("propiedad_id"), column("periodo"),
                    column("concepto_propiedad_id"), column("estado"))
 _importe = table("importe_mensual", column("concepto_propiedad_id"), column("periodo"),
@@ -133,7 +135,24 @@ def insertar_reparto(session: Session, preliquidacion_id: UUID,
     ])
 
 
-# --- Lectura de una versión completa (la reutiliza HU-12) ------------------------
+# --- Consultas de HU-12 ---------------------------------------------------------
+
+def listar(session: Session, propiedad_id: UUID, periodo: date):
+    """Cabeceras de todas las versiones del período, de la 1 en adelante."""
+    stmt = (select(_cabecera)
+            .where(_cabecera.c.propiedad_id == propiedad_id, _cabecera.c.periodo == periodo)
+            .order_by(_cabecera.c.version))
+    return session.connection().execute(stmt).mappings().all()
+
+
+def id_vigente(session: Session, propiedad_id: UUID, periodo: date) -> UUID | None:
+    """id de la versión vigente (la de mayor número), o None si no hay ninguna."""
+    stmt = select(_vigente.c.id).where(_vigente.c.propiedad_id == propiedad_id,
+                                       _vigente.c.periodo == periodo)
+    return session.connection().execute(stmt).scalar_one_or_none()
+
+
+# --- Lectura de una versión completa ---------------------------------------------
 
 def obtener(session: Session, preliquidacion_id: UUID) -> dict | None:
     """Cabecera, detalle, advertencias y reparto de una versión, tal como se guardaron.
