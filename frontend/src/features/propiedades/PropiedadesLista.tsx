@@ -7,6 +7,7 @@ import {
   useReactTable,
   type SortingState,
 } from '@tanstack/react-table'
+import { PlantillaEditor } from '../plantilla/PlantillaEditor'
 import { RepartoEditor } from './RepartoEditor'
 import { Cargando } from '../../components/Cargando'
 import { PropiedadForm } from './PropiedadForm'
@@ -26,6 +27,7 @@ export function PropiedadesLista() {
   // 'nueva' = formulario de alta; un id = edición de esa propiedad; null = ninguno.
   const [formulario, setFormulario] = useState<'nueva' | string | null>(null)
   const [repartoDe, setRepartoDe] = useState<string | null>(null)
+  const [plantillaDe, setPlantillaDe] = useState<string | null>(null)
 
   const columnas = [
     col.accessor('direccion', { header: 'Dirección' }),
@@ -41,7 +43,8 @@ export function PropiedadesLista() {
       cell: (i) => (
         <>
           <button type="button" onClick={() => setFormulario(i.row.original.id)}>Editar</button>{' '}
-          <button type="button" onClick={() => setRepartoDe(i.row.original.id)}>Reparto</button>
+          <button type="button" onClick={() => setRepartoDe(i.row.original.id)}>Reparto</button>{' '}
+          <button type="button" onClick={() => setPlantillaDe(i.row.original.id)}>Plantilla</button>
         </>
       ),
     }),
@@ -78,6 +81,11 @@ export function PropiedadesLista() {
         <RepartoEditor key={repartoDe} propiedadId={repartoDe!}
           direccion={data.find((p) => p.id === repartoDe)!.direccion}
           onTerminar={() => setRepartoDe(null)} />
+      )}
+      {data.some((p) => p.id === plantillaDe) && (
+        <PlantillaEditor key={plantillaDe} propiedadId={plantillaDe!}
+          direccion={data.find((p) => p.id === plantillaDe)!.direccion}
+          onTerminar={() => setPlantillaDe(null)} />
       )}
       {data.length === 0 ? (
         <p>No hay propiedades cargadas.</p>
