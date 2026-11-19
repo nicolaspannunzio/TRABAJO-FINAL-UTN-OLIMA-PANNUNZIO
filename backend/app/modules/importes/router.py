@@ -7,7 +7,6 @@ from sqlmodel import Session
 from app.core.contract import errores
 from app.core.db import get_session
 from app.core.deps import Usuario, get_current_user
-from app.core.errors import no_implementado
 from app.modules.checklist.schemas import FilaChecklist
 from app.modules.importes import service
 from app.modules.importes.schemas import ImporteCorregir, ImporteCrear, ImporteOut
@@ -26,5 +25,9 @@ def cargar_importe(datos: ImporteCrear, session: Session = Depends(get_session),
 
 
 @router.patch("/{importe_id}", response_model=ImporteOut, responses=errores(404))
-def corregir_importe(importe_id: UUID, datos: ImporteCorregir):
-    raise no_implementado()
+def corregir_importe(importe_id: UUID, datos: ImporteCorregir,
+                     session: Session = Depends(get_session),
+                     usuario: Usuario = Depends(get_current_user)):
+    # HU-13 / RN-14: cambia el importe y guarda el anterior en auditoria, en una transacción.
+    # Las versiones ya generadas no cambian.
+    return service.corregir_importe(session, usuario.id, importe_id, datos)
