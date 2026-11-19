@@ -6,8 +6,8 @@ from sqlmodel import Session, select
 
 from app.modules.conceptos.models import Concepto
 
-# UNIQUE de concepto.nombre en esquema_completo.sql (nombre que Postgres le da por defecto).
-_UQ_NOMBRE = "concepto_nombre_key"
+# Índice único de concepto.nombre (sin distinguir mayúsculas) en esquema_completo.sql.
+_UQ_NOMBRE = "uq_concepto_nombre_ci"
 
 
 class NombreDuplicado(Exception):

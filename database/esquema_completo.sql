@@ -94,11 +94,14 @@ CREATE TABLE propiedad_propietario (
 -- Umbral efectivo = COALESCE(concepto.umbral_variacion_pct, umbral global).
 CREATE TABLE concepto (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    nombre               TEXT NOT NULL UNIQUE,
+    nombre               TEXT NOT NULL,
     tipo                 TEXT,
     umbral_variacion_pct NUMERIC(5,2)
                          CHECK (umbral_variacion_pct > 0)
 );
+
+-- Nombre unico sin distinguir mayusculas: 'TGI' y 'tgi' son el mismo concepto.
+CREATE UNIQUE INDEX uq_concepto_nombre_ci ON concepto (lower(nombre));
 
 CREATE TABLE concepto_propiedad (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
