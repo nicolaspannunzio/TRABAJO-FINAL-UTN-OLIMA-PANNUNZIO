@@ -16,6 +16,7 @@ import { useAbrirPeriodo, useChecklist, usePropiedadesOpciones } from './queries
 import type { EstadoChecklist, FilaChecklist } from './tipos'
 
 import { PanelAdvertencias } from '../advertencias/PanelAdvertencias'
+import { GenerarPreliquidacion } from '../preliquidaciones/GenerarPreliquidacion'
 
 // --- Textos de la interfaz ---------------------------------------------------
 
@@ -199,6 +200,11 @@ function ChecklistDelPeriodo({ propiedadId, periodo }: Seleccion) {
           </p>
           <TablaChecklist filas={filas} propiedadId={propiedadId} periodo={periodo} />
           <PanelAdvertencias propiedadId={propiedadId} periodo={periodo} filas={filas} />
+          <GenerarPreliquidacion
+            key={`${propiedadId}-${periodo}`}
+            propiedadId={propiedadId}
+            periodo={periodo}
+          />
         </>
       )}
     </div>
