@@ -6,7 +6,6 @@ from sqlmodel import Session
 
 from app.core.contract import errores
 from app.core.db import get_session
-from app.core.errors import no_implementado
 from app.modules.propiedades import service
 from app.modules.propiedades.schemas import (PropiedadActualizar, PropiedadCrear, PropiedadOut,
                                              PropietarioActualizar, PropietarioCrear,
@@ -41,15 +40,16 @@ def actualizar_propiedad(propiedad_id: UUID, datos: PropiedadActualizar,
 
 @_propiedades.get("/{propiedad_id}/propietarios", response_model=list[RepartoVigente],
                   responses=errores(404))
-def obtener_reparto(propiedad_id: UUID):
-    raise no_implementado()
+def obtener_reparto(propiedad_id: UUID, session: Session = Depends(get_session)):
+    return service.obtener_reparto(session, propiedad_id)
 
 
 @_propiedades.put("/{propiedad_id}/propietarios", response_model=list[RepartoVigente],
                   responses=errores(404))
-def reemplazar_reparto(propiedad_id: UUID, datos: list[RepartoEntrada]):
+def reemplazar_reparto(propiedad_id: UUID, datos: list[RepartoEntrada],
+                       session: Session = Depends(get_session)):
     # Reemplaza todo en una transacción; la suma = 100 se valida antes del COMMIT.
-    raise no_implementado()
+    return service.reemplazar_reparto(session, propiedad_id, datos)
 
 
 # --- Propietarios --------------------------------------------------------------
