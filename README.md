@@ -44,15 +44,35 @@ El sistema permite:
 |---|---|
 | Frontend (Vercel) | https://tp-final-tupad-olima-pannunzio-tco7.vercel.app/ |
 | Backend (Render) | https://tp-final-tupad-olima-pannunzio-4vnx.onrender.com (estado: [`/health`](https://tp-final-tupad-olima-pannunzio-4vnx.onrender.com/health)) |
-| Base de datos y Auth (Supabase) | https://supabase.com/dashboard/project/jepsjxfposzjyxgxeklx |
+| Base de datos y Auth (Supabase) | Proyecto privado del equipo: el panel de Supabase solo abre para los integrantes (ver [Verificación por un tercero](#verificación-por-un-tercero), nota C) |
 | Informe Final (PDF) | <COMPLETAR: enlace al PDF> |
 | Video de presentación | <COMPLETAR: enlace al video> |
  
-**Cuenta demo:** admin@emailprueba.com / #Adminprueba2026. Es una cuenta de prueba con datos ficticios; en este repositorio no hay credenciales reales.
+**Cuenta demo (rol operador):** `operador@emailprueba.com` / `2026tupad+`. Es una cuenta de prueba con datos ficticios: permite recorrer el sistema completo salvo la gestión de usuarios, que es exclusiva del rol administrador. La cuenta de administrador se entrega al tutor por mensaje privado. En este repositorio no hay credenciales reales.
  
 > **Aviso de arranque en frío.** El backend en Render se duerme cuando no tiene tráfico y la primera petición puede tardar hasta cerca de un minuto. Antes de usar el sistema o de mostrarlo, abrí `/health` en el navegador y esperá a que responda; después el frontend anda con normalidad.
  
 **Versión entregada:** tag v1.0.0. Los tres componentes desplegados corresponden al commit de ese tag.
+ 
+---
+ 
+## Verificación por un tercero
+ 
+Hay dos formas de comprobar que el sistema funciona sin depender de los integrantes.
+ 
+**A. Sin instalar nada (sistema desplegado)**
+ 
+1. Abrir [`/health`](https://tp-final-tupad-olima-pannunzio-4vnx.onrender.com/health) y esperar `{"estado":"ok","base":"ok"}` (por el arranque en frío puede tardar cerca de un minuto).
+2. Abrir el [frontend](https://tp-final-tupad-olima-pannunzio-tco7.vercel.app/) e iniciar sesión con la cuenta demo.
+3. Seguir el recorrido de demostración: pasos 1 a 13 del guion en [`plan_implementacion.md`](docs/plan_implementacion.md), sección 6. El paso 14 (alta o baja de un usuario) necesita la cuenta de administrador. Las capturas de cada paso están en [`docs/evidencia`](docs/evidencia).
+ 
+**B. Solo las pruebas automáticas, en local (no necesita Supabase)**
+ 
+Requisitos: Python 3.13 y PostgreSQL. Seguir el paso **2. Backend** de [Ejecución en local](#ejecución-en-local) hasta `cp .env.example .env` y después [Pruebas y contrato de la API](#pruebas-y-contrato-de-la-api). Solo hace falta completar `TEST_DATABASE_URL`. Resultado esperado: `338 passed`.
+ 
+Este camino se verificó el 20/11/2026 sobre un clon limpio del repositorio, siguiendo únicamente este README.
+ 
+> **C. Nota sobre el sistema completo en local.** La base de datos de la aplicación y el inicio de sesión corren en un proyecto de Supabase que es privado del equipo: su panel solo abre para los integrantes y sus claves no se publican. Por eso no se comparte. Para levantar el sistema completo en otra máquina hace falta un proyecto de Supabase propio (el plan gratuito alcanza), siguiendo [Ejecución en local](#ejecución-en-local) desde el paso 1.
  
 ---
  
@@ -134,7 +154,7 @@ Requisitos: Python 3.13, Node.js 22, PostgreSQL local (para las pruebas) y un pr
 **1. Base de datos**
  
 1. En el proyecto de Supabase, cargar `database/esquema_completo.sql` (SQL Editor).
-2. Aplicar las migraciones de `database/migrations/` en orden.
+2. Aplicar las migraciones de `database/migrations/` en orden. En una base nueva no cambian nada, porque `esquema_completo.sql` ya las incluye, pero se pueden ejecutar igual sin error. Hacen falta en una base creada con una versión anterior del esquema.
 3. Crear un usuario en Supabase Auth (Authentication → Users) y una fila en la tabla `usuario` con **el mismo id** y rol `admin`. Con ese usuario se inicia sesión.
 4. Opcional, para tener datos de demostración: ejecutar `database/seed/seed_demo.sql`. Necesita ese usuario `admin` y una base limpia. Para volver a cargarla en un ensayo, ejecutar antes `database/seed/reset_demo.sql` (solo para ensayos: deshabilita los triggers de inmutabilidad).
 **2. Backend**
