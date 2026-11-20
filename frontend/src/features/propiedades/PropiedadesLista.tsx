@@ -29,6 +29,23 @@ export function PropiedadesLista() {
   const [repartoDe, setRepartoDe] = useState<string | null>(null)
   const [plantillaDe, setPlantillaDe] = useState<string | null>(null)
 
+  // Un solo panel abierto a la vez: abrir uno cierra los otros dos.
+  const abrirFormulario = (valor: 'nueva' | string) => {
+    setRepartoDe(null)
+    setPlantillaDe(null)
+    setFormulario(valor)
+  }
+  const abrirReparto = (id: string) => {
+    setFormulario(null)
+    setPlantillaDe(null)
+    setRepartoDe(id)
+  }
+  const abrirPlantilla = (id: string) => {
+    setFormulario(null)
+    setRepartoDe(null)
+    setPlantillaDe(id)
+  }
+
   const columnas = [
     col.accessor('direccion', { header: 'Dirección' }),
     col.accessor('localidad', { header: 'Localidad', cell: (i) => i.getValue() ?? '—' }),
@@ -42,9 +59,9 @@ export function PropiedadesLista() {
       header: '',
       cell: (i) => (
         <>
-          <button type="button" onClick={() => setFormulario(i.row.original.id)}>Editar</button>{' '}
-          <button type="button" onClick={() => setRepartoDe(i.row.original.id)}>Reparto</button>{' '}
-          <button type="button" onClick={() => setPlantillaDe(i.row.original.id)}>Plantilla</button>
+          <button type="button" onClick={() => abrirFormulario(i.row.original.id)}>Editar</button>{' '}
+          <button type="button" onClick={() => abrirReparto(i.row.original.id)}>Reparto</button>{' '}
+          <button type="button" onClick={() => abrirPlantilla(i.row.original.id)}>Plantilla</button>
         </>
       ),
     }),
@@ -69,7 +86,7 @@ export function PropiedadesLista() {
   return (
     <section aria-labelledby="titulo-propiedades">
       <h2 id="titulo-propiedades">Propiedades</h2>
-      <button type="button" onClick={() => setFormulario('nueva')} disabled={formulario === 'nueva'}>
+      <button type="button" onClick={() => abrirFormulario('nueva')} disabled={formulario === 'nueva'}>
         Nueva propiedad
       </button>
 
