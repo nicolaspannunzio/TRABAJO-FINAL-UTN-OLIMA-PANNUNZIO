@@ -42,8 +42,11 @@ def vista_previa(session: Session, propiedad_id: UUID, periodo: date) -> list[Ad
                        f"{_mes(anterior)} ({fila['anterior']:.2f} → {fila['actual']:.2f}); "
                        f"umbral {umbral:.2f} %")
         elif resultado.tipo == "sin_referencia":
-            motivo = ("sin importe" if fila["anterior"] is None else "importe en 0")
-            detalle = f"{fila['concepto']}: {motivo} en {_mes(anterior)}, no se calcula variación"
+            # RN-16: sin importe anterior, o con importe en 0, no hay contra qué comparar.
+            # El texto no afirma un importe (issue #42): el mes anterior puede no haberse
+            # cargado, no corresponder o tener $0, y en los tres casos no hay referencia.
+            detalle = (f"{fila['concepto']}: sin importe de referencia en {_mes(anterior)}, "
+                       f"no se calcula la variación")
         else:
             continue
 

@@ -113,8 +113,13 @@ def test_vista_previa_aplica_los_criterios_de_hu10(client, escenario):
 
     assert "35.00 %" in por_concepto[cps["A"]]["detalle"]
     assert "120.00 %" in por_concepto[cps["D"]]["detalle"]
-    assert "sin importe" in por_concepto[cps["E"]]["detalle"]
-    assert "importe en 0" in por_concepto[cps["F"]]["detalle"]
+    # Issue #42: sin referencia el texto no afirma un importe (ni "en 0"): solo dice que
+    # no hay importe de referencia en el mes anterior. Es el mismo texto en los dos casos.
+    for clave in ("E", "F"):
+        detalle = por_concepto[cps[clave]]["detalle"]
+        assert "sin importe de referencia en 2026-08" in detalle
+        assert "no se calcula la variación" in detalle
+        assert "importe en 0" not in detalle
 
 
 def test_vista_previa_no_persiste_nada(client, escenario):
