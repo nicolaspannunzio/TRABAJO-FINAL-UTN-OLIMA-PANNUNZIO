@@ -12,14 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AutenticadoRouteImport } from './routes/_autenticado'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AutenticadoIndexRouteImport } from './routes/_autenticado/index'
-import { Route as AutenticadoAdvertenciasRouteImport } from './routes/_autenticado/advertencias'
 import { Route as AutenticadoChecklistRouteImport } from './routes/_autenticado/checklist'
 import { Route as AutenticadoConceptosRouteImport } from './routes/_autenticado/conceptos'
-import { Route as AutenticadoImportesRouteImport } from './routes/_autenticado/importes'
-import { Route as AutenticadoPlantillaRouteImport } from './routes/_autenticado/plantilla'
 import { Route as AutenticadoPreliquidacionesRouteImport } from './routes/_autenticado/preliquidaciones'
 import { Route as AutenticadoPropiedadesRouteImport } from './routes/_autenticado/propiedades'
-import { Route as AutenticadoRepartoRouteImport } from './routes/_autenticado/reparto'
 import { Route as AutenticadoUsuariosRouteImport } from './routes/_autenticado/usuarios'
 
 const AutenticadoRoute = AutenticadoRouteImport.update({
@@ -36,11 +32,6 @@ const AutenticadoIndexRoute = AutenticadoIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AutenticadoRoute,
 } as any)
-const AutenticadoAdvertenciasRoute = AutenticadoAdvertenciasRouteImport.update({
-  id: '/advertencias',
-  path: '/advertencias',
-  getParentRoute: () => AutenticadoRoute,
-} as any)
 const AutenticadoChecklistRoute = AutenticadoChecklistRouteImport.update({
   id: '/checklist',
   path: '/checklist',
@@ -49,16 +40,6 @@ const AutenticadoChecklistRoute = AutenticadoChecklistRouteImport.update({
 const AutenticadoConceptosRoute = AutenticadoConceptosRouteImport.update({
   id: '/conceptos',
   path: '/conceptos',
-  getParentRoute: () => AutenticadoRoute,
-} as any)
-const AutenticadoImportesRoute = AutenticadoImportesRouteImport.update({
-  id: '/importes',
-  path: '/importes',
-  getParentRoute: () => AutenticadoRoute,
-} as any)
-const AutenticadoPlantillaRoute = AutenticadoPlantillaRouteImport.update({
-  id: '/plantilla',
-  path: '/plantilla',
   getParentRoute: () => AutenticadoRoute,
 } as any)
 const AutenticadoPreliquidacionesRoute =
@@ -72,11 +53,6 @@ const AutenticadoPropiedadesRoute = AutenticadoPropiedadesRouteImport.update({
   path: '/propiedades',
   getParentRoute: () => AutenticadoRoute,
 } as any)
-const AutenticadoRepartoRoute = AutenticadoRepartoRouteImport.update({
-  id: '/reparto',
-  path: '/reparto',
-  getParentRoute: () => AutenticadoRoute,
-} as any)
 const AutenticadoUsuariosRoute = AutenticadoUsuariosRouteImport.update({
   id: '/usuarios',
   path: '/usuarios',
@@ -86,26 +62,18 @@ const AutenticadoUsuariosRoute = AutenticadoUsuariosRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AutenticadoIndexRoute
   '/login': typeof LoginRoute
-  '/advertencias': typeof AutenticadoAdvertenciasRoute
   '/checklist': typeof AutenticadoChecklistRoute
   '/conceptos': typeof AutenticadoConceptosRoute
-  '/importes': typeof AutenticadoImportesRoute
-  '/plantilla': typeof AutenticadoPlantillaRoute
   '/preliquidaciones': typeof AutenticadoPreliquidacionesRoute
   '/propiedades': typeof AutenticadoPropiedadesRoute
-  '/reparto': typeof AutenticadoRepartoRoute
   '/usuarios': typeof AutenticadoUsuariosRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/advertencias': typeof AutenticadoAdvertenciasRoute
   '/checklist': typeof AutenticadoChecklistRoute
   '/conceptos': typeof AutenticadoConceptosRoute
-  '/importes': typeof AutenticadoImportesRoute
-  '/plantilla': typeof AutenticadoPlantillaRoute
   '/preliquidaciones': typeof AutenticadoPreliquidacionesRoute
   '/propiedades': typeof AutenticadoPropiedadesRoute
-  '/reparto': typeof AutenticadoRepartoRoute
   '/usuarios': typeof AutenticadoUsuariosRoute
   '/': typeof AutenticadoIndexRoute
 }
@@ -113,14 +81,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_autenticado': typeof AutenticadoRouteWithChildren
   '/login': typeof LoginRoute
-  '/_autenticado/advertencias': typeof AutenticadoAdvertenciasRoute
   '/_autenticado/checklist': typeof AutenticadoChecklistRoute
   '/_autenticado/conceptos': typeof AutenticadoConceptosRoute
-  '/_autenticado/importes': typeof AutenticadoImportesRoute
-  '/_autenticado/plantilla': typeof AutenticadoPlantillaRoute
   '/_autenticado/preliquidaciones': typeof AutenticadoPreliquidacionesRoute
   '/_autenticado/propiedades': typeof AutenticadoPropiedadesRoute
-  '/_autenticado/reparto': typeof AutenticadoRepartoRoute
   '/_autenticado/usuarios': typeof AutenticadoUsuariosRoute
   '/_autenticado/': typeof AutenticadoIndexRoute
 }
@@ -129,40 +93,28 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/advertencias'
     | '/checklist'
     | '/conceptos'
-    | '/importes'
-    | '/plantilla'
     | '/preliquidaciones'
     | '/propiedades'
-    | '/reparto'
     | '/usuarios'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
-    | '/advertencias'
     | '/checklist'
     | '/conceptos'
-    | '/importes'
-    | '/plantilla'
     | '/preliquidaciones'
     | '/propiedades'
-    | '/reparto'
     | '/usuarios'
     | '/'
   id:
     | '__root__'
     | '/_autenticado'
     | '/login'
-    | '/_autenticado/advertencias'
     | '/_autenticado/checklist'
     | '/_autenticado/conceptos'
-    | '/_autenticado/importes'
-    | '/_autenticado/plantilla'
     | '/_autenticado/preliquidaciones'
     | '/_autenticado/propiedades'
-    | '/_autenticado/reparto'
     | '/_autenticado/usuarios'
     | '/_autenticado/'
   fileRoutesById: FileRoutesById
@@ -195,13 +147,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutenticadoIndexRouteImport
       parentRoute: typeof AutenticadoRoute
     }
-    '/_autenticado/advertencias': {
-      id: '/_autenticado/advertencias'
-      path: '/advertencias'
-      fullPath: '/advertencias'
-      preLoaderRoute: typeof AutenticadoAdvertenciasRouteImport
-      parentRoute: typeof AutenticadoRoute
-    }
     '/_autenticado/checklist': {
       id: '/_autenticado/checklist'
       path: '/checklist'
@@ -214,20 +159,6 @@ declare module '@tanstack/react-router' {
       path: '/conceptos'
       fullPath: '/conceptos'
       preLoaderRoute: typeof AutenticadoConceptosRouteImport
-      parentRoute: typeof AutenticadoRoute
-    }
-    '/_autenticado/importes': {
-      id: '/_autenticado/importes'
-      path: '/importes'
-      fullPath: '/importes'
-      preLoaderRoute: typeof AutenticadoImportesRouteImport
-      parentRoute: typeof AutenticadoRoute
-    }
-    '/_autenticado/plantilla': {
-      id: '/_autenticado/plantilla'
-      path: '/plantilla'
-      fullPath: '/plantilla'
-      preLoaderRoute: typeof AutenticadoPlantillaRouteImport
       parentRoute: typeof AutenticadoRoute
     }
     '/_autenticado/preliquidaciones': {
@@ -244,13 +175,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutenticadoPropiedadesRouteImport
       parentRoute: typeof AutenticadoRoute
     }
-    '/_autenticado/reparto': {
-      id: '/_autenticado/reparto'
-      path: '/reparto'
-      fullPath: '/reparto'
-      preLoaderRoute: typeof AutenticadoRepartoRouteImport
-      parentRoute: typeof AutenticadoRoute
-    }
     '/_autenticado/usuarios': {
       id: '/_autenticado/usuarios'
       path: '/usuarios'
@@ -262,27 +186,19 @@ declare module '@tanstack/react-router' {
 }
 
 interface AutenticadoRouteChildren {
-  AutenticadoAdvertenciasRoute: typeof AutenticadoAdvertenciasRoute
   AutenticadoChecklistRoute: typeof AutenticadoChecklistRoute
   AutenticadoConceptosRoute: typeof AutenticadoConceptosRoute
-  AutenticadoImportesRoute: typeof AutenticadoImportesRoute
-  AutenticadoPlantillaRoute: typeof AutenticadoPlantillaRoute
   AutenticadoPreliquidacionesRoute: typeof AutenticadoPreliquidacionesRoute
   AutenticadoPropiedadesRoute: typeof AutenticadoPropiedadesRoute
-  AutenticadoRepartoRoute: typeof AutenticadoRepartoRoute
   AutenticadoUsuariosRoute: typeof AutenticadoUsuariosRoute
   AutenticadoIndexRoute: typeof AutenticadoIndexRoute
 }
 
 const AutenticadoRouteChildren: AutenticadoRouteChildren = {
-  AutenticadoAdvertenciasRoute: AutenticadoAdvertenciasRoute,
   AutenticadoChecklistRoute: AutenticadoChecklistRoute,
   AutenticadoConceptosRoute: AutenticadoConceptosRoute,
-  AutenticadoImportesRoute: AutenticadoImportesRoute,
-  AutenticadoPlantillaRoute: AutenticadoPlantillaRoute,
   AutenticadoPreliquidacionesRoute: AutenticadoPreliquidacionesRoute,
   AutenticadoPropiedadesRoute: AutenticadoPropiedadesRoute,
-  AutenticadoRepartoRoute: AutenticadoRepartoRoute,
   AutenticadoUsuariosRoute: AutenticadoUsuariosRoute,
   AutenticadoIndexRoute: AutenticadoIndexRoute,
 }
