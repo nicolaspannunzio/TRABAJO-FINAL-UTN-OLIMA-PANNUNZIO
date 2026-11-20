@@ -50,7 +50,23 @@ export function CargaImporte({ fila, propiedadId, periodo }: Props) {
     },
   })
 
-  if (fila.estado !== 'pendiente') return null
+  if (fila.estado !== 'pendiente') {
+    // Issue #36: ante un duplicado el checklist se refresca y la fila pasa a `cargado`.
+    // Antes el componente desaparecía con su mensaje; ahora el aviso queda visible hasta
+    // que el usuario lo cierra, y muestra el importe que se conservó.
+    const duplicado = cargar.error instanceof ApiError && cargar.error.codigo === 'importe_duplicado'
+    if (!duplicado) return null
+    return (
+      <span role="alert" style={{ display: 'block', color: 'crimson' }}>
+        No se cargó: este concepto ya tenía un importe en el período (lo cargó otra persona o
+        otra pestaña). Se conservó el primero
+        {fila.importe != null ? `: $ ${fila.importe}` : ''}.{' '}
+        <button type="button" onClick={() => cargar.reset()}>
+          Entendido
+        </button>
+      </span>
+    )
+  }
 
   return (
     <form
