@@ -38,6 +38,32 @@ El sistema permite:
  
 ---
  
+## Sistema desplegado y entregables
+ 
+| Qué | Enlace |
+|---|---|
+| Frontend (Vercel) | https://tp-final-tupad-olima-pannunzio-tco7.vercel.app/ |
+| Backend (Render) | https://tp-final-tupad-olima-pannunzio-4vnx.onrender.com (estado: [`/health`](https://tp-final-tupad-olima-pannunzio-4vnx.onrender.com/health)) |
+| Base de datos y Auth (Supabase) | https://supabase.com/dashboard/project/jepsjxfposzjyxgxeklx |
+| Informe Final (PDF) | <COMPLETAR: enlace al PDF> |
+| Video de presentación | <COMPLETAR: enlace al video> |
+ 
+**Cuenta demo:** admin@emailprueba.com / #Adminprueba2026. Es una cuenta de prueba con datos ficticios; en este repositorio no hay credenciales reales.
+ 
+> **Aviso de arranque en frío.** El backend en Render se duerme cuando no tiene tráfico y la primera petición puede tardar hasta cerca de un minuto. Antes de usar el sistema o de mostrarlo, abrí `/health` en el navegador y esperá a que responda; después el frontend anda con normalidad.
+ 
+**Versión entregada:** tag v1.0.0. Los tres componentes desplegados corresponden al commit de ese tag.
+ 
+---
+ 
+## Qué está implementado y qué es proyectado
+ 
+Las 14 historias de usuario (HU-01 a HU-14) están implementadas, desplegadas y probadas: A1–A6 y B1–B9, con su recorrido de demo (14 pasos) y las capturas en [`docs/evidencia`](docs/evidencia). El detalle por historia, con rutas, pruebas y evidencia, está en [`docs/implementado_vs_proyectado.md`](docs/implementado_vs_proyectado.md); la matriz de pruebas por criterio de aceptación, en [`docs/pruebas.md`](docs/pruebas.md).
+ 
+Lo proyectado (no construido) es el fuera de alcance de arriba: contratos e inquilinos, alertas de vencimiento y emails. Las reglas con la inmobiliaria que quedan **a confirmar** (umbral de variación de 30 % y bloqueo al generar con conceptos pendientes) están implementadas como configurables.
+ 
+---
+ 
 ## Tecnologías
  
 | Componente | Stack |
@@ -59,25 +85,27 @@ El sistema permite:
 ```
 /backend     → API en FastAPI (app/core, app/audit, app/modules/<módulo>, scripts, tests)
 /frontend    → Aplicación React (src/features/<módulo>, components, services, context, types)
-/database    → Esquema de base de datos (esquema_completo.sql) y seed
-/docs        → Documentación del proyecto y contrato de la API (openapi.json)
+/database    → Esquema (esquema_completo.sql), migraciones y seed (seed_demo.sql, reset_demo.sql)
+/docs        → Documentación del proyecto, contrato de la API (openapi.json) y evidencia
 /.github     → Workflow de CI
 ```
  
-La documentación del modelo está en [`/docs`](docs):
+La documentación está en [`/docs`](docs):
  
+- [`requerimientos.md`](docs/requerimientos.md): problema, alcance, historias de usuario y reglas de negocio
 - [`arquitectura.md`](docs/arquitectura.md)
 - [`diagrama_ER.md`](docs/diagrama_ER.md)
 - [`listado_modulos.md`](docs/listado_modulos.md)
-- [`requerimientos.md`](docs/requerimientos.md)
-- [`plan_implementacion.md`](docs/plan_implementacion.md)
+- [`plan_implementacion.md`](docs/plan_implementacion.md): unidades de trabajo y guion de la demo
+- [`pruebas.md`](docs/pruebas.md)
+- [`implementado_vs_proyectado.md`](docs/implementado_vs_proyectado.md)
 ---
  
 ## Variables de entorno
  
-Cada componente tiene su propio `.env.example`, con los nombres de las variables y sin valores secretos. Los archivos `.env` no se versionan.
+Cada componente tiene su propio `.env.example`, con los nombres de las variables y sin valores secretos. Los archivos `.env` no se versionan. En producción las variables del backend se definen en Render y las del frontend en Vercel.
  
-**Backend** (`backend/.env`)
+**Backend** (`backend/.env` en local, Render en producción)
  
 | Variable | Uso |
 |---|---|
@@ -85,11 +113,11 @@ Cada componente tiene su propio `.env.example`, con los nombres de las variables
 | `SUPABASE_URL` | URL del proyecto de Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave de servicio (Admin API para crear usuarios) |
 | `SUPABASE_JWT_SECRET` | Validación del token en cada request |
-| `CORS_ALLOWED_ORIGIN` | Único origen permitido (en local, `http://localhost:5173`) |
+| `CORS_ALLOWED_ORIGIN` | Único origen permitido (en local, `http://localhost:5173`; en Render, la URL de Vercel) |
 | `UMBRAL_VARIACION_DEFAULT_PCT` | Umbral global de variación inusual (por defecto `30.00`) |
 | `TEST_DATABASE_URL` | Base descartable para pytest (host local y nombre terminado en `_test`) |
  
-**Frontend** (`frontend/.env`)
+**Frontend** (`frontend/.env` en local, Vercel en producción)
  
 | Variable | Uso |
 |---|---|
@@ -101,11 +129,14 @@ Cada componente tiene su propio `.env.example`, con los nombres de las variables
  
 ## Ejecución en local
  
-Requisitos: Python 3.13, Node.js 22 y un proyecto de Supabase (o una base PostgreSQL con el esquema cargado).
+Requisitos: Python 3.13, Node.js 22, PostgreSQL local (para las pruebas) y un proyecto de Supabase (para Auth y la base de la aplicación).
  
 **1. Base de datos**
-Cargar `database/esquema_completo.sql` en la base de datos (y, opcionalmente, los datos de demostración de `database/seed`).
  
+1. En el proyecto de Supabase, cargar `database/esquema_completo.sql` (SQL Editor).
+2. Aplicar las migraciones de `database/migrations/` en orden.
+3. Crear un usuario en Supabase Auth (Authentication → Users) y una fila en la tabla `usuario` con **el mismo id** y rol `admin`. Con ese usuario se inicia sesión.
+4. Opcional, para tener datos de demostración: ejecutar `database/seed/seed_demo.sql`. Necesita ese usuario `admin` y una base limpia. Para volver a cargarla en un ensayo, ejecutar antes `database/seed/reset_demo.sql` (solo para ensayos: deshabilita los triggers de inmutabilidad).
 **2. Backend**
 ```bash
 cd backend
@@ -113,7 +144,7 @@ python -m venv .venv
 source .venv/bin/activate        # en Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env             # completar los valores
-uvicorn app.main:app --reload    # http://localhost:8000
+uvicorn app.main:app --reload    # http://localhost:8000  (estado: /health)
 ```
  
 **3. Frontend**
@@ -124,12 +155,16 @@ cp .env.example .env             # completar los valores
 npm run dev                      # http://localhost:5173
 ```
  
+Con los dos servidores levantados, abrir http://localhost:5173 e iniciar sesión con el usuario del paso 1.3.
+ 
 ---
  
 ## Pruebas y contrato de la API
  
+Los tests del backend recrean el esquema en una base PostgreSQL local y descartable. Antes de correrlos, crear la base (por ejemplo `createdb preliquidacion_test`) y definir `TEST_DATABASE_URL` en `backend/.env` apuntando a ella; si el host no es local o el nombre no termina en `_test`, pytest aborta para no tocar datos reales.
+ 
 ```bash
-# Backend: los tests recrean el esquema en una base descartable (TEST_DATABASE_URL)
+# Backend
 cd backend
 python -m pytest
  
@@ -149,28 +184,7 @@ El CI (`.github/workflows/ci.yml`) corre en cada pull request y en cada push a `
  
 ## Flujo de trabajo
  
-- Ramas: `feat/<módulo>-<unidad>` o `chore/shared-<tema>`.
+- Ramas: `feat/<módulo>-<unidad>`, `fix/<módulo>-<tema>`, `docs/<tema>` o `chore/shared-<tema>`.
 - Commits convencionales, en español.
 - Un pull request por unidad de trabajo, revisado por el otro integrante antes del merge.
----
  
-## Estado
- 
-El proyecto está en la **Fase 1 (desarrollo por módulos)**; la Fase 0 (fundación) está cerrada: esqueleto del repositorio, documentación del modelo, contrato de la API, CI y despliegue.
- 
-| Unidad | Alcance | Estado |
-|---|---|---|
-| A1 (HU-01) | Autenticación: endurecimiento del login, cierre de sesión, aviso por usuario inactivo o sesión vencida | Mergeado |
-| B1 (HU-07) | Apertura de período y checklist mensual | Mergeado |
-| B2 (HU-08) | Carga de importes con rechazo de duplicados y auditoría | Mergeado |
-| A2 (HU-02) | Gestión de usuarios y roles | En curso |
-| Resto de Fase 1 | Ver [`plan_implementacion.md`](docs/plan_implementacion.md) | Pendiente |
- 
-**Sistema desplegado**
- 
-- Backend (Render): https://tp-final-tupad-olima-pannunzio-4vnx.onrender.com
-- Frontend (Vercel): https://tp-final-tupad-olima-pannunzio-tco7.vercel.app/
-Este README se completa en la fase final con:
- 
-- el enlace al Informe Final y al video;
-- la versión entregada (tag) y el detalle de lo implementado y lo proyectado.
