@@ -45,14 +45,14 @@ El sistema permite:
 | Frontend (Vercel) | https://tp-final-tupad-olima-pannunzio-tco7.vercel.app/ |
 | Backend (Render) | https://tp-final-tupad-olima-pannunzio-4vnx.onrender.com (estado: [`/health`](https://tp-final-tupad-olima-pannunzio-4vnx.onrender.com/health)) |
 | Base de datos y Auth (Supabase) | Proyecto privado del equipo: el panel de Supabase solo abre para los integrantes (ver [Verificación por un tercero](#verificación-por-un-tercero), nota C) |
-| Informe Final (PDF) | <COMPLETAR: enlace al PDF> |
-| Video de presentación | <COMPLETAR: enlace al video> |
+| Informe Final (PDF) | [docs/Trabajo_Final_TUPaD_Informe.pdf](/docs/Trabajo_Final_TUPaD_Informe.pdf) |
+| Video de presentación | https://drive.google.com/drive/folders/1CaJsjOmDJUGX8u9oB0WoJePpDgt-MdoV?usp=drive_link |
  
 **Cuenta demo (rol operador):** `operador@emailprueba.com` / `2026tupad+`. Es una cuenta de prueba con datos ficticios: permite recorrer el sistema completo salvo la gestión de usuarios, que es exclusiva del rol administrador. La cuenta de administrador se entrega al tutor por mensaje privado. En este repositorio no hay credenciales reales.
  
 > **Aviso de arranque en frío.** El backend en Render se duerme cuando no tiene tráfico y la primera petición puede tardar hasta cerca de un minuto. Antes de usar el sistema o de mostrarlo, abrí `/health` en el navegador y esperá a que responda; después el frontend anda con normalidad.
  
-**Versión entregada:** tag v1.0.0. Los tres componentes desplegados corresponden al commit de ese tag.
+**Versión entregada:** tag v1.0.1. Los tres componentes desplegados corresponden al commit de ese tag.
  
 ---
  
